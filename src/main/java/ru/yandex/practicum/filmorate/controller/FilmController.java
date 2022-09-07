@@ -40,7 +40,7 @@ public class FilmController {
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public Film updateFilm(@Valid @RequestBody Film film) {
-        if (!containsId(film)) {
+        if (films.values().stream().map(Film::getId).noneMatch(id -> id.equals(film.getId()))) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильма с id=" + film.getId() + "нет");
         }
         if (film.getReleaseDate().isBefore(minDate)) {
@@ -61,15 +61,6 @@ public class FilmController {
 
     private Integer getId() {
         return id++;
-    }
-
-    private boolean containsId(Film film) {
-        for (Film savedFilm : films.values()) {
-            if (savedFilm.getId() != null && savedFilm.getId().equals(film.getId())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @ExceptionHandler(ResponseStatusException.class)

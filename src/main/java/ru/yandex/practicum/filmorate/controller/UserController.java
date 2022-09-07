@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
@@ -39,7 +38,7 @@ public class UserController {
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public User updateUser(@Valid @RequestBody User user) {
-        if (!containsId(user)) {
+        if (users.values().stream().map(User::getId).noneMatch(id -> id.equals(user.getId()))) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователя с id=" + user.getId() + "нет");
         }
         if (user.getName() == null || user.getName().isBlank()) {
@@ -60,15 +59,6 @@ public class UserController {
 
     private Integer getId() {
         return id++;
-    }
-
-    private boolean containsId(User user) {
-        for (User savedUser : users.values()) {
-            if (savedUser.getId() != null && savedUser.getId().equals(user.getId())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @ExceptionHandler(ResponseStatusException.class)
