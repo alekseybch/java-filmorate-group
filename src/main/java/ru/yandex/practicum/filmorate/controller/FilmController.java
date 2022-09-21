@@ -1,79 +1,76 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.*;
 
 @RestController
 @RequestMapping("/films")
-@Slf4j
 public class FilmController {
-    private Map<Integer, Film> films = new HashMap<>();
-    private final LocalDate minDate = LocalDate.of(1895,12,28);
-    private Integer id = 1;
+    private FilmService filmService;
+
+    @Autowired
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Film addFilm(@Valid @RequestBody Film film) {
-        if (films.containsValue(film)) {
-            log.warn("Такой фильм уже есть");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Такой фильм уже есть");
-        }
-        if (film.getReleaseDate().isBefore(minDate)) {
-            log.warn("Дата релиза не может быть раньше 28.12.1895\nТекущая дата релиза: " + film.getReleaseDate());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Дата релиза не может быть раньше 28.12.1895");
-        }
-        film.setId(getId());
-        films.put(film.getId(), film);
-        log.info("Фильм {} сохранен", film);
-        return film;
+        return filmService.addFilm(film);
     }
 
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public Film updateFilm(@Valid @RequestBody Film film) {
-        if (films.values().stream().map(Film::getId).noneMatch(id -> id.equals(film.getId()))) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильма с id=" + film.getId() + "нет");
-        }
-        if (film.getReleaseDate().isBefore(minDate)) {
-            log.warn("Дата релиза не может быть раньше 28.12.1895\nТекущая дата релиза: " + film.getReleaseDate());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Дата релиза не может быть раньше 28.12.1895");
-        }
-        films.put(film.getId(), film);
-        log.info("Фильм {} обновлен", film);
-        return film;
+        return filmService.updateFilm(film);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<Film> getFilms() {
-        log.info("Текущее кол-во фильмов: " +films.size());
-        return new ArrayList<>(films.values());
+        return filmService.getFilms();
     }
 
-    private Integer getId() {
-        return id++;
+    @PutMapping("{id}/like/{userId}")
+    public String addLike(@PathVariable Integer userId, @PathVariable("id") Integer filmId) {
+        if (userId <=0 || filmId <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "id и filmId не могут быть отрицательныи либо равены 0");
+        }
+        return filmService.addLike(userId, filmId);
     }
 
-    @ExceptionHandler(ResponseStatusException.class)
-    private ResponseEntity<String> handleException(ResponseStatusException exception) {
-        return ResponseEntity
-                .status(exception.getStatus())
-                .body(exception.getMessage());
+    @GetMapping("{id}")
+    public Film getFilm(@PathVariable("id") Integer filmId) {
+        if (filmId <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "id не может быть отрицательным либо равен 0");
+        }
+        return filmService.getFilm(filmId);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    private ResponseEntity<String> handleException(MethodArgumentNotValidException exception) {
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(HttpStatus.BAD_REQUEST + " " + exception.getFieldError().getDefaultMessage());
+    @DeleteMapping("{id}/like/{userId}")
+    public String deleteFilm(@PathVariable Integer userId, @PathVariable("id") Integer filmId) {
+        if (userId <=0 || filmId <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "id и filmId не могут быть отрицательныи либо равены 0");
+        }
+        return filmService.deleteLike(userId,filmId);
+    }
+
+    @GetMapping("popular")
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count) {
+        if (count <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "count не может быть отрицательным либо равен 0");
+        }
+        return filmService.getSortedFilms(count);
     }
 }
