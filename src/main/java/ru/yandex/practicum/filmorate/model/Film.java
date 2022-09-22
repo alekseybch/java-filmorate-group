@@ -23,20 +23,7 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "Некорректная продолжительность фильма")
     private Long duration;
-    private Set<Integer> likes;
-
-    public Film(Integer id, String name, String description, LocalDate releaseDate, Long duration, Set<Integer> likes) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-        if (likes == null) {
-            this.likes = new HashSet<>();
-        } else {
-            this.likes = likes;
-        }
-    }
+    private final Set<Integer> likes = new HashSet<>();
 
     public void addLike(User user) throws ResponseStatusException {
         if (likes.contains(user.getId())) {

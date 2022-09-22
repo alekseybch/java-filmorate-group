@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -26,20 +24,7 @@ public class User {
     private String name;
     @Past(message = "Дата рождения не может быть в будущем")
     private LocalDate birthday;
-    private Set<Integer> friends;
-
-    public User(Integer id, String email, String login, String name, LocalDate birthday, Set<Integer> friends) {
-        this.id = id;
-        this.email = email;
-        this.login = login;
-        this.name = name;
-        this.birthday = birthday;
-        if (friends == null) {
-            this.friends = new HashSet<>();
-        } else {
-            this.friends = friends;
-        }
-    }
+    private final Set<Integer> friends = new HashSet<>();
 
     public void addFriend(User user) throws ResponseStatusException {
         if (friends.contains(user.getId())) {
