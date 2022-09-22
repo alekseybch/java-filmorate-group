@@ -66,6 +66,10 @@ public class FilmService {
     public String addLike(Integer userId, Integer filmId) throws ResponseStatusException {
         User user;
         Film film;
+        if (userId <=0 || filmId <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "id и filmId не могут быть отрицательныи либо равены 0");
+        }
         if (users.getUsersMap().get(userId) == null) {
             String message = "Ошибка запроса добавления лайка фильму" +
                     " Невозможно поставить лайк от пользователя с id= " + userId + " которого не существует.";
@@ -87,6 +91,10 @@ public class FilmService {
     public String deleteLike(Integer userId, Integer filmId) throws ResponseStatusException {
         User user;
         Film film;
+        if (userId <=0 || filmId <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "id и filmId не могут быть отрицательныи либо равены 0");
+        }
         if (users.getUsersMap().get(userId) == null) {
             String message = "Ошибка запроса удаления лайка" +
                     " Невозможно удалить лайк от пользователя с id= " + userId + " которого не существует.";
@@ -107,8 +115,8 @@ public class FilmService {
 
     public List<Film> getSortedFilms(Integer count) throws ResponseStatusException {
         if (count <= 0) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR
-                    , "Параметр count не может быть меньше либо равен 0");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "count не может быть отрицательным либо равен 0");
         }
         Comparator<Film> sortFilm = (f1, f2) -> {
             Integer filmLikes1 = f1.getLikes().size();
@@ -121,6 +129,10 @@ public class FilmService {
     }
 
     public Film getFilm(Integer filmId) {
+        if (filmId <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "id не может быть отрицательным либо равен 0");
+        }
         if (films.getFilmsMap().get(filmId) == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильма с id= " + filmId + " не существует");
         }

@@ -41,48 +41,27 @@ public class UserController {
 
     @GetMapping("{id}")
     public User getUser(@PathVariable("id") Integer userId) {
-        if (userId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "id не может быть отрицательным либо равен 0");
-        }
         return userService.getUser(userId);
     }
 
     @PutMapping("{id}/friends/{friendId}")
-    public String addFriend(@PathVariable("id") Integer userId
-            , @PathVariable Integer friendId) {
-        if (userId <=0 || friendId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "id и friendId не могут быть отрицательныи либо равены 0");
-        }
+    public String addFriend(@PathVariable("id") Integer userId, @PathVariable Integer friendId) {
         return userService.addFriend(userId, friendId);
     }
 
     @DeleteMapping("{id}/friends/{friendId}")
-    public String deleteFriend(@PathVariable("id") Integer userId
-            , @PathVariable Integer friendId) {
-        if (userId <=0 || friendId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "id и friendId не могут быть отрицательныи либо равены 0");
-        }
+    public String deleteFriend(@PathVariable("id") Integer userId, @PathVariable Integer friendId) {
         return userService.deleteFriend(userId, friendId);
     }
 
     @GetMapping("{id}/friends")
     public List<User> getUserFriends(@PathVariable("id") Integer userId) {
-        if (userId <=0 ) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "id не может быть отрицательным либо равен 0");
-        }
+
         return userService.getFriends(userId);
     }
 
     @GetMapping("{id}/friends/common/{friendId}")
-    public List<User> getCommonFriends(@PathVariable("id") Integer userId
-            , @PathVariable Integer friendId) {
-        if (userId <=0 || friendId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "id и friendId не могут быть отрицательныи либо равены 0");
-        }
+    public List<User> getCommonFriends(@PathVariable("id") Integer userId, @PathVariable Integer friendId) {
         return userService.getCommonFriends(userId, friendId);
     }
 }

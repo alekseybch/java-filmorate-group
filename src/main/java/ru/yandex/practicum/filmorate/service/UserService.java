@@ -60,6 +60,10 @@ public class UserService {
     public String addFriend(Integer idUser, Integer friendId) throws ResponseStatusException {
         User user;
         User friend;
+        if (idUser <=0 || friendId <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "id и friendId не могут быть отрицательныи либо равены 0");
+        }
         if (users.getUsersMap().get(idUser) == null) {
             String message = "Ошибка добавления в друзья!" +
                     " Невозможно добавиться в друзья к пользователю с несуществующим id= " + idUser;
@@ -82,6 +86,10 @@ public class UserService {
     public String deleteFriend(Integer idUser, Integer friendId) throws ResponseStatusException {
         User user;
         User friend;
+        if (idUser <=0 || friendId <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "id и friendId не могут быть отрицательныи либо равены 0");
+        }
         if (users.getUsersMap().get(idUser) == null) {
             String message = "Ошибка удаления из друзей!" +
                     " Невозможно удалиться из друзей несуществующего пользователя с id=" + idUser;
@@ -104,6 +112,10 @@ public class UserService {
     public List<User> getCommonFriends(Integer idUser, Integer friendId) throws ResponseStatusException {
         User user;
         User friend;
+        if (idUser <=0 || friendId <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "id и friendId не могут быть отрицательныи либо равены 0");
+        }
         if (users.getUsersMap().get(idUser) == null) {
             String message = "Ошибка запроса списка общих друзей!" +
                     " Невозможно получить список друзей несуществующего пользователя с id=" + idUser;
@@ -127,6 +139,9 @@ public class UserService {
 
     public List<User> getFriends(Integer friendId) throws ResponseStatusException {
         User friend;
+        if (friendId <=0 ) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "id не может быть отрицательным либо равен 0");
+        }
         if (users.getUsersMap().get(friendId) == null) {
             String message = "Ошибка запроса списка друзей!" +
                     " Невозможно получить список друзей несуществующего пользователя с id=" + friendId;
@@ -138,6 +153,10 @@ public class UserService {
     }
 
     public User getUser(Integer userId) {
+        if (userId <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "id не может быть отрицательным либо равен 0");
+        }
         if (users.getUsersMap().get(userId) == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователя с id= " + userId + " не существует");
         }

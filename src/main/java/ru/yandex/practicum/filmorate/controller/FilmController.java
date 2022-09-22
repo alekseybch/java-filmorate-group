@@ -40,37 +40,21 @@ public class FilmController {
 
     @PutMapping("{id}/like/{userId}")
     public String addLike(@PathVariable Integer userId, @PathVariable("id") Integer filmId) {
-        if (userId <=0 || filmId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "id и filmId не могут быть отрицательныи либо равены 0");
-        }
         return filmService.addLike(userId, filmId);
     }
 
     @GetMapping("{id}")
     public Film getFilm(@PathVariable("id") Integer filmId) {
-        if (filmId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "id не может быть отрицательным либо равен 0");
-        }
         return filmService.getFilm(filmId);
     }
 
     @DeleteMapping("{id}/like/{userId}")
     public String deleteFilm(@PathVariable Integer userId, @PathVariable("id") Integer filmId) {
-        if (userId <=0 || filmId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "id и filmId не могут быть отрицательныи либо равены 0");
-        }
         return filmService.deleteLike(userId,filmId);
     }
 
     @GetMapping("popular")
     public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count) {
-        if (count <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "count не может быть отрицательным либо равен 0");
-        }
         return filmService.getSortedFilms(count);
     }
 }
