@@ -1,77 +1,67 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.*;
 
 @RestController
 @RequestMapping("/users")
-@Slf4j
+
 public class UserController {
-    private Map<Integer, User> users = new HashMap<>();
-    private Integer id = 1;
+    private UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public User addUser(@Valid @RequestBody User user) {
-        if (users.containsValue(user)) {
-            log.warn("Такой пользователь уже есть");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Такой пользователь уже есть");
-        }
-        user.setId(getId());
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-            log.debug("Имя пользователя пустое. Был использован логин");
-        }
-        users.put(user.getId(), user);
-        log.info("Пользователь {} сохранен", user);
-        return user;
+        return userService.addUser(user);
     }
 
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public User updateUser(@Valid @RequestBody User user) {
-        if (users.values().stream().map(User::getId).noneMatch(id -> id.equals(user.getId()))) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователя с id=" + user.getId() + "нет");
-        }
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-            log.debug("Имя пользователя пустое. Был использован логин");
-        }
-        users.put(user.getId(), user);
-        log.info("Пользователь {} сохранен", user);
-        return user;
+        return userService.updateUser(user);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<User> getUsers() {
-        log.info("Текущее кол-во пользователей: " + users.size());
-        return new ArrayList<>(users.values());
+        return userService.getUsers();
     }
 
-    private Integer getId() {
-        return id++;
+    @GetMapping("{id}")
+    public User getUser(@PathVariable("id") Integer userId) {
+        return userService.getUser(userId);
     }
 
-    @ExceptionHandler(ResponseStatusException.class)
-    private ResponseEntity<String> handleException(ResponseStatusException exception) {
-        return ResponseEntity
-                .status(exception.getStatus())
-                .body(exception.getMessage());
+    @PutMapping("{id}/friends/{friendId}")
+    public String addFriend(@PathVariable("id") Integer userId, @PathVariable Integer friendId) {
+        return userService.addFriend(userId, friendId);
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    private ResponseEntity<String> handleException(MethodArgumentNotValidException exception) {
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(HttpStatus.BAD_REQUEST + " " + exception.getFieldError().getDefaultMessage());
+    @DeleteMapping("{id}/friends/{friendId}")
+    public String deleteFriend(@PathVariable("id") Integer userId, @PathVariable Integer friendId) {
+        return userService.deleteFriend(userId, friendId);
+    }
+
+    @GetMapping("{id}/friends")
+    public List<User> getUserFriends(@PathVariable("id") Integer userId) {
+
+        return userService.getFriends(userId);
+    }
+
+    @GetMapping("{id}/friends/common/{friendId}")
+    public List<User> getCommonFriends(@PathVariable("id") Integer userId, @PathVariable Integer friendId) {
+        return userService.getCommonFriends(userId, friendId);
     }
 }
