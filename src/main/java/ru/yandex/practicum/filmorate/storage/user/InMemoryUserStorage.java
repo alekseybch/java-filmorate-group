@@ -7,26 +7,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class InMemoryUserStorage implements UserStorage{
+public class InMemoryUserStorage {
     private final Map<Integer, User> users = new HashMap<>();
 
-    @Override
+    //@Override
     public void add(User user) {
         users.put(user.getId(), user);
     }
 
-    @Override
+   // @Override
     public void delete(User user) {
         users.remove(user.getId());
     }
 
-    @Override
+   // @Override
     public void update(User user) {
         users.put(user.getId(), user);
     }
 
-    @Override
-    public Map<Integer, User> getUsersMap() {
+    //@Override
+    public Map<Integer, User> getUsersList() {
         return users;
     }
 }

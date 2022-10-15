@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -45,13 +44,13 @@ public class UserController {
     }
 
     @PutMapping("{id}/friends/{friendId}")
-    public String addFriend(@PathVariable("id") Integer userId, @PathVariable Integer friendId) {
-        return userService.addFriend(userId, friendId);
+    public void addFriend(@PathVariable("id") Integer userId, @PathVariable Integer friendId) {
+        userService.addFriend(userId, friendId);
     }
 
     @DeleteMapping("{id}/friends/{friendId}")
-    public String deleteFriend(@PathVariable("id") Integer userId, @PathVariable Integer friendId) {
-        return userService.deleteFriend(userId, friendId);
+    public void deleteFriend(@PathVariable("id") Integer userId, @PathVariable Integer friendId) {
+        userService.deleteFriend(userId, friendId);
     }
 
     @GetMapping("{id}/friends")

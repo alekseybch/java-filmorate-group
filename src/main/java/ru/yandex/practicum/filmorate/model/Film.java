@@ -5,10 +5,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 
+
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Data
 @Builder
@@ -22,22 +22,22 @@ public class Film {
     @PastOrPresent(message = "Некорректная дата релиза")
     private LocalDate releaseDate;
     @Positive(message = "Некорректная продолжительность фильма")
-    private Long duration;
-    private final Set<Integer> likes = new HashSet<>();
+    private Integer duration;
+    @EqualsAndHashCode.Exclude
+    private final Set<User> likes = new HashSet<>();
+    @EqualsAndHashCode.Exclude
+    private final Set<Genre> genres = new TreeSet<>();
+    @EqualsAndHashCode.Exclude
+    @NotNull
+    private Mpa mpa;
 
-    public void addLike(User user) throws ResponseStatusException {
-        if (likes.contains(user.getId())) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR
-                    , "Невозможно дважды поставить лайк фильм одному и тому же фильму.");
-        }
-        likes.add(user.getId());
-    }
-
-    public void deleteLike(User user) {
-        if (!likes.contains(user.getId())) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR
-                    , "Невозможно удалить лайк у фильма от пользователя который его не ставил.");
-        }
-        likes.remove(user.getId());
+    public Map<String, Object> toMap() {
+        Map<String, Object> values = new HashMap<>();
+        values.put("name", name);
+        values.put("description", description);
+        values.put("release_date", releaseDate);
+        values.put("duration", duration);
+        values.put("mpa", mpa.getId());
+        return values;
     }
 }

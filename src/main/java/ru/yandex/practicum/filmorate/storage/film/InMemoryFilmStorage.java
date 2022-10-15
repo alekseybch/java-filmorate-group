@@ -7,26 +7,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class InMemoryFilmStorage implements FilmStorage {
+public class InMemoryFilmStorage  {
     private final Map<Integer, Film> films = new HashMap<>();
 
-    @Override
+    //@Override
     public void add(Film film) {
         films.put(film.getId(), film);
     }
 
-    @Override
+   // @Override
     public void delete(Film film) {
         films.remove(film.getId());
     }
 
-    @Override
+   // @Override
     public void update(Film film) {
         films.put(film.getId(), film);
     }
 
-    @Override
-    public Map<Integer, Film> getFilmsMap() {
+   // @Override
+    public Map<Integer, Film> getFilmsList() {
         return films;
     }
 }
