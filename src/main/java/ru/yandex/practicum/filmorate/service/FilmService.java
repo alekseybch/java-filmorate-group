@@ -7,31 +7,24 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class FilmService {
-    private FilmStorage films;
-    private UserStorage users;
+    private final FilmStorage films;
     private final LocalDate minDate = LocalDate.of(1895, 12, 28);
-    private Integer globalId = 1;
 
     @Autowired
 
-    public FilmService(@Qualifier("FilmDbStorage") FilmStorage films, @Qualifier("UserDbStorage") UserStorage users) {
-
+    public FilmService(@Qualifier("FilmDbStorage") FilmStorage films) {
         this.films = films;
-        this.users = users;
     }
 
     public Film addFilm(Film film) throws ResponseStatusException {
@@ -97,9 +90,5 @@ public class FilmService {
                     "id не может быть отрицательным либо равен 0");
         }
         return films.getFilm(filmId);
-    }
-
-    private Integer getNextId() {
-        return globalId++;
     }
 }

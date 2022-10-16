@@ -9,7 +9,7 @@ import java.util.List;
 
 @Service
 public class GenreService {
-    private GenreStorage genres;
+    private final GenreStorage genres;
 
     @Autowired
     public GenreService(GenreStorage genres) {

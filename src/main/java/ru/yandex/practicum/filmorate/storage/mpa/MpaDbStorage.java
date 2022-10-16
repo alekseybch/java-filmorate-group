@@ -14,7 +14,7 @@ import java.util.List;
 
 @Repository("MpaDbStorage")
 public class MpaDbStorage implements MpaStorage{
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
     public MpaDbStorage(JdbcTemplate jdbcTemplate) {
@@ -45,14 +45,4 @@ public class MpaDbStorage implements MpaStorage{
                 .name(resultSet.getString("mpa_name"))
                 .build();
     }
-
-/*    private boolean dbContainsGenre(Integer Id) {
-        String sqlQuery = "SELECT * FROM genre WHERE genre_id = ?";
-        try {
-            jdbcTemplate.queryForObject(sqlQuery, this::makeMpa, Id);
-            return true;
-        } catch (EmptyResultDataAccessException e) {
-            return false;
-        }
-    }*/
 }

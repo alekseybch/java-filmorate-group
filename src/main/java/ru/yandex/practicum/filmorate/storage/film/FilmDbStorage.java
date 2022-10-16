@@ -49,9 +49,6 @@ public class FilmDbStorage implements FilmStorage{
     }
 
     @Override
-    public void delete (Film film) {}
-
-    @Override
     public Film update (Film film) {
         String sqlQuery = "UPDATE film " +
                 "SET name = ?, description = ?, release_date = ?, duration = ?, mpa = ? WHERE film_id = ?";

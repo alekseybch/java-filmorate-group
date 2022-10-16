@@ -9,15 +9,12 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class UserService {
-    private UserStorage users;
-    private Integer globalId = 1;
+    private final UserStorage users;
 
     @Autowired
     public UserService(@Qualifier("UserDbStorage") UserStorage users) {
@@ -98,9 +95,5 @@ public class UserService {
                     "id не может быть отрицательным либо равен 0");
         }
         return users.getUser(userId);
-    }
-
-    private Integer getNextId() {
-        return globalId++;
     }
 }

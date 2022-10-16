@@ -19,7 +19,7 @@ import java.util.List;
 @Repository("UserDbStorage")
 @Slf4j
 public class UserDbStorage implements UserStorage {
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
     public UserDbStorage(JdbcTemplate jdbcTemplate) {

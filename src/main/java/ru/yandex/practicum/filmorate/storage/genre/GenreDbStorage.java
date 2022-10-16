@@ -14,7 +14,7 @@ import java.util.List;
 
 @Repository("GenreDbStorage")
 public class GenreDbStorage implements GenreStorage {
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
     public GenreDbStorage(JdbcTemplate jdbcTemplate) {

@@ -11,7 +11,7 @@ import java.util.List;
 
 @Service
 public class MpaService {
-    private MpaStorage mpas;
+    private final MpaStorage mpas;
 
     @Autowired
     public MpaService(MpaStorage mpas) {
