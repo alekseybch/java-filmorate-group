@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -12,13 +12,9 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/films")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FilmController {
-    private FilmService filmService;
-
-    @Autowired
-    public FilmController(FilmService filmService) {
-        this.filmService = filmService;
-    }
+    private final FilmService filmService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -39,8 +35,8 @@ public class FilmController {
     }
 
     @PutMapping("{id}/like/{userId}")
-    public String addLike(@PathVariable Integer userId, @PathVariable("id") Integer filmId) {
-        return filmService.addLike(userId, filmId);
+    public void addLike(@PathVariable Integer userId, @PathVariable("id") Integer filmId) {
+        filmService.addLike(userId, filmId);
     }
 
     @GetMapping("{id}")
@@ -49,8 +45,8 @@ public class FilmController {
     }
 
     @DeleteMapping("{id}/like/{userId}")
-    public String deleteFilm(@PathVariable Integer userId, @PathVariable("id") Integer filmId) {
-        return filmService.deleteLike(userId,filmId);
+    public void deleteLike(@PathVariable Integer userId, @PathVariable("id") Integer filmId) {
+        filmService.deleteLike(userId,filmId);
     }
 
     @GetMapping("popular")
