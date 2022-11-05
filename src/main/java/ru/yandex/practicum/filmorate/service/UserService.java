@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -91,9 +92,16 @@ public class UserService {
 
     public User getUser(Integer userId) {
         if (userId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "id не может быть отрицательным либо равен 0");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,  "id не может быть отрицательным либо равен 0");
         }
         return users.getUser(userId);
     }
+
+    public List<Film> getRecommendations(Integer userId) {
+        if (userId <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "id не может быть отрицательным либо равен 0");
+        }
+        return users.getRecommendations(userId);
+    }
+
 }

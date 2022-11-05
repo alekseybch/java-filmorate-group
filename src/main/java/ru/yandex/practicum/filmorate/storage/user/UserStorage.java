@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.List;
-import java.util.Map;
 
 public interface UserStorage {
     void add(User user);
@@ -23,4 +23,6 @@ public interface UserStorage {
     List<User> getFriends(Integer friendId);
 
     User getUser(Integer userId);
+
+    List<Film> getRecommendations(int userId);
 }

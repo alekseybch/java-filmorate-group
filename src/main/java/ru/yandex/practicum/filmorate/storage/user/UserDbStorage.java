@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -10,21 +11,21 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository("UserDbStorage")
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public UserDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    private final FilmStorage filmStorage;
 
     @Override
     public void add(User user) {
@@ -38,8 +39,9 @@ public class UserDbStorage implements UserStorage {
         user.getFriends().stream().map(friend -> jdbcTemplate.update(sqlQuery, userId, friend));
     }
 
-    public void delete(User user) {
-    }
+    @Override
+    public void delete(User user) {}
+
     @Override
     public void update(User user) {
         String sqlQuery = "UPDATE person " +
@@ -141,6 +143,55 @@ public class UserDbStorage implements UserStorage {
         }
         String sqlQuery = "SELECT * FROM person WHERE person_id = ?";
         return jdbcTemplate.queryForObject(sqlQuery, this::makeUser, userId);
+    }
+
+    @Override
+    public List<Film> getRecommendations(int userId) {
+        List<Film> films = filmStorage.getFilmsList();
+        List<Film> userLikes;
+        Map<Integer, List<Film>> usersAndLikes = new HashMap<>();
+        for (Film film : films) {
+            for (User user : film.getLikes()) {
+                if (!usersAndLikes.containsKey(user.getId())) {
+                    List<Film> likedFilms = new ArrayList<>();
+                    likedFilms.add(film);
+                    usersAndLikes.put(user.getId(), likedFilms);
+                } else {
+                    usersAndLikes.get(user.getId()).add(film);
+                }
+            }
+        }
+
+        userLikes = usersAndLikes.get(userId);
+        if (userLikes == null) {
+            log.info("У пользователя с id={} нет лайков", userId);
+            return new ArrayList<>();
+        }
+        Map<Integer, Integer> frequencyLikes = new HashMap<>(); // userId - freq
+        for (Map.Entry<Integer, List<Film>> entry: usersAndLikes.entrySet()) {
+            if (entry.getKey() == userId) {
+                continue;
+            }
+            if (!frequencyLikes.containsKey(entry.getKey())) {
+                frequencyLikes.put(entry.getKey(), 0);
+            }
+            Integer freq = frequencyLikes.get(entry.getKey());
+        userLikes.stream().filter(film -> entry.getValue().contains(film)).forEach(film -> frequencyLikes.put(entry.getKey(), freq + 1));
+        }
+
+        int maxFreq = 0;
+        Integer id = null;
+        for ( Map.Entry<Integer, Integer> entry : frequencyLikes.entrySet()) {
+            if (maxFreq < entry.getValue()) {
+                maxFreq = entry.getValue();
+                id = entry.getKey();
+            }
+        }
+        if (maxFreq == 0) {
+            log.info("У пользователя с id={} нет общих лайков с кем либо", userId);
+            return new ArrayList<>();
+        }
+        return usersAndLikes.get(id).stream().filter(film -> !userLikes.contains(film)).collect(Collectors.toList());
     }
 
     private int addUserInfo(User user) {
