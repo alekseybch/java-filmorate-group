@@ -1,10 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.*;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
-
-
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
@@ -27,6 +23,8 @@ public class Film {
     private final Set<User> likes = new HashSet<>();
     @EqualsAndHashCode.Exclude
     private final Set<Genre> genres = new TreeSet<>();
+    @EqualsAndHashCode.Exclude
+    private final Set<Director> directors = new HashSet<>();
     @EqualsAndHashCode.Exclude
     @NotNull
     private Mpa mpa;
