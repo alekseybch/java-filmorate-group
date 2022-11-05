@@ -85,4 +85,16 @@ public class FilmService {
         }
         return films.getFilm(filmId);
     }
+
+    public List<Film> getSortedDirectorFilms(Integer directorId, String sortBy) {
+        if (directorId <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "id не может быть отрицательным либо равен 0");
+        }
+        if (!(sortBy.equals("year") || sortBy.equals("likes"))) {
+            log.warn("Невозможно отсортировать по: " + sortBy);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Сортировка может быть только по year или likes");
+        }
+        return films.getSortedDirectorFilms(directorId, sortBy);
+    }
 }
