@@ -32,9 +32,8 @@ public class FilmService {
             log.warn("Дата релиза не может быть раньше 28.12.1895\nТекущая дата релиза: " + film.getReleaseDate());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Дата релиза не может быть раньше 28.12.1895");
         }
-        films.add(film);
-        log.info("Фильм {} сохранен", film);
-        return film;
+
+        return films.add(film);
     }
 
     public Film updateFilm(Film film) throws ResponseStatusException {
@@ -71,8 +70,7 @@ public class FilmService {
 
     public List<Film> getSortedFilms(Integer count) throws ResponseStatusException {
         if (count <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "count не может быть отрицательным либо равен 0");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "count не может быть отрицательным либо равен 0");
         }
         Comparator<Film> sortFilm = (f1, f2) -> {
             Integer filmLikes1 = f1.getLikes().size();
@@ -86,9 +84,16 @@ public class FilmService {
 
     public Film getFilm(Integer filmId) {
         if (filmId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "id не может быть отрицательным либо равен 0");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "id не может быть отрицательным либо равен 0");
         }
         return films.getFilm(filmId);
+    }
+
+    public void deleteFilm(Integer filmId) {
+        if (filmId <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "id не может быть отрицательным либо равен 0");
+        }
+        films.delete(filmId);
+        log.info("Фильм с id=" + filmId + " удален");
     }
 }
