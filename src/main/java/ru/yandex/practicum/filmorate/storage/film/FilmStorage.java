@@ -15,7 +15,7 @@ public interface FilmStorage {
 
     void deleteLike(Integer userId, Integer filmId);
 
-    Film getFilm (Integer id);
+    Film getFilm(Integer id);
 
     boolean dbContainsFilm(Integer filmId);
 
@@ -24,4 +24,5 @@ public interface FilmStorage {
     List<Film> getSortedDirectorFilms(Integer directorId, String sortBy);
 
     void delete(Integer filmId);
+
 }
