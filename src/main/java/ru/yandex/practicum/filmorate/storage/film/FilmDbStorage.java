@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.model.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository("FilmDbStorage")
 @Slf4j
@@ -328,5 +329,58 @@ public class FilmDbStorage implements FilmStorage{
 
     private Director makeDirector(ResultSet resultSet, int rowSum) throws SQLException {
         return new Director(resultSet.getInt("director_id"), resultSet.getString("director_name"));
+    }
+
+    private boolean dbContainsGenre(Integer genreId) {
+        String sqlQuery = "SELECT * FROM genre WHERE genre_id = ?";
+        try {
+            jdbcTemplate.queryForObject(sqlQuery, this::makeGenre, genreId);
+            return true;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }
+    }
+
+    public List<Film> getTopFilms(Integer count, Integer genreId, Integer year) {
+        if (genreId != null && !dbContainsGenre(genreId)) {
+            String message = "Ошибка запроса списка популярных фильмов по жанру!" +
+                    " Невозможно получить список фильмов несуществующего жанра с id=" + genreId;
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
+        }
+        if (genreId != null && year != null) {
+            String sqlQuery = "SELECT f.*, m.mpa_name, g.*, COUNT(l.person_id) as likes FROM film AS f " +
+                    "LEFT JOIN mpa AS m ON f.mpa = m.mpa_id " +
+                    "LEFT JOIN genre_films AS gf ON f.film_id = gf.film_id " +
+                    "LEFT JOIN genre AS g ON gf.genre_id = g.genre_id " +
+                    "LEFT JOIN likes AS l on f.film_id = l.film_id " +
+                    "WHERE g.genre_id = ? AND EXTRACT(YEAR FROM CAST(f.release_date AS date)) = ? " +
+                    "GROUP BY f.film_id " +
+                    "ORDER BY likes DESC";
+            return jdbcTemplate.query(sqlQuery, this::makeFilm, genreId, year);
+        } else if (genreId != null) {
+            String sqlQuery = "SELECT f.*, m.mpa_name, g.*, COUNT(l.person_id) as likes FROM film AS f " +
+                    "LEFT JOIN mpa AS m ON f.mpa = m.mpa_id " +
+                    "LEFT JOIN genre_films AS gf ON f.film_id = gf.film_id " +
+                    "LEFT JOIN genre AS g ON gf.genre_id = g.genre_id " +
+                    "LEFT JOIN likes AS l on f.film_id = l.film_id " +
+                    "WHERE g.genre_id = ? " +
+                    "GROUP BY f.film_id " +
+                    "ORDER BY likes DESC";
+            return jdbcTemplate.query(sqlQuery, this::makeFilm, genreId);
+        } else if (year != null) {
+            String sqlQuery = "SELECT f.*, m.mpa_name, COUNT(l.person_id) as likes FROM film AS f " +
+                    "LEFT JOIN mpa AS m ON f.mpa = m.mpa_id " +
+                    "LEFT JOIN likes AS l on f.film_id = l.film_id " +
+                    "WHERE EXTRACT(YEAR FROM CAST(f.release_date AS date)) = ? " +
+                    "GROUP BY f.film_id " +
+                    "ORDER BY likes DESC";
+            return jdbcTemplate.query(sqlQuery, this::makeFilm, year);
+        }
+        String sqlQuery = "SELECT f.*, m.mpa_name, COUNT(l.person_id) as likes FROM film AS f " +
+                "LEFT JOIN mpa AS m ON f.mpa = m.mpa_id " +
+                "LEFT JOIN likes AS l on f.film_id = l.film_id " +
+                "GROUP BY f.film_id " +
+                "ORDER BY likes DESC";
+        return jdbcTemplate.query(sqlQuery, this::makeFilm);
     }
 }
