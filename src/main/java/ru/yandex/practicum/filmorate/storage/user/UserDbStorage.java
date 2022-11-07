@@ -174,7 +174,7 @@ public class UserDbStorage implements UserStorage {
             log.info("У пользователя с id={} нет лайков", userId);
             return new ArrayList<>();
         }
-        Map<Integer, Integer> frequencyLikes = new HashMap<>(); // userId - freq
+        Map<Integer, Integer> frequencyLikes = new HashMap<>(); // userId/freq
         for (Map.Entry<Integer, List<Film>> entry: usersAndLikes.entrySet()) {
             if (entry.getKey() == userId) {
                 continue;
@@ -183,7 +183,8 @@ public class UserDbStorage implements UserStorage {
                 frequencyLikes.put(entry.getKey(), 0);
             }
             Integer freq = frequencyLikes.get(entry.getKey());
-        userLikes.stream().filter(film -> entry.getValue().contains(film)).forEach(film -> frequencyLikes.put(entry.getKey(), freq + 1));
+        userLikes.stream().filter(film -> entry.getValue().contains(film))
+                .forEach(film -> frequencyLikes.put(entry.getKey(), freq + 1));
         }
 
         int maxFreq = 0;
