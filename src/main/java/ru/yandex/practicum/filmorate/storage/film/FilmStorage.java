@@ -5,7 +5,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.util.List;
 
 public interface FilmStorage {
-    void add(Film film);
+    Film add(Film film);
 
     Film update(Film film);
 
@@ -19,10 +19,9 @@ public interface FilmStorage {
 
     boolean dbContainsFilm(Integer filmId);
 
-    List<Film> getTopFilms(Integer count, Integer genreId, Integer year);
-
     List<Film> getSortedDirectorFilms(Integer directorId, String sortBy);
 
     void delete(Integer filmId);
 
+    List<Film> getTopFilms(Integer count, Integer genreId, Integer year);
 }
