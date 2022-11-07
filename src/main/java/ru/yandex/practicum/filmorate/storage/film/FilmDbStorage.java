@@ -328,4 +328,30 @@ public class FilmDbStorage implements FilmStorage{
     private Director makeDirector(ResultSet resultSet, int rowSum) throws SQLException {
         return new Director(resultSet.getInt("director_id"), resultSet.getString("director_name"));
     }
+
+    public List<Film> getFilmByTitle(String filmName) {
+        String str = filmName.substring(0,1).toUpperCase() + filmName.substring(1).toLowerCase();
+        String sqlQuery = "SELECT F.*, M.mpa_name FROM FILM AS F JOIN MPA AS M on F.MPA = M.MPA_ID WHERE F.NAME LIKE ? ";
+        return jdbcTemplate.query(sqlQuery, this::makeFilm,  "%" + str + "%" );
+    }
+
+    @Override
+    public List<Film> getFilmByDirector(String directorName) {
+        String str = directorName.toLowerCase();
+        String sqlQuery = "SELECT f.*, m.mpa_name FROM film AS f " +
+                "JOIN mpa AS m ON f.mpa = m.mpa_id " +
+                "JOIN director_films AS df ON f.film_id = df.film_id " +
+                "JOIN director AS d ON df.director_id = d.director_id WHERE d.DIRECTOR_NAME LIKE ? ";
+        return jdbcTemplate.query(sqlQuery, this::makeFilm,  "%" + str + "%" );
+    }
+
+    @Override
+    public List<Film> getFilmByTitleDirector(String titleDirector) {
+        List<Film> filmList;
+        String directorName = titleDirector.toLowerCase();
+        filmList = getFilmByDirector(directorName);
+        String filmName = titleDirector.substring(0,1).toUpperCase() + titleDirector.substring(1).toLowerCase();
+        filmList.addAll(getFilmByTitle(filmName));
+        return filmList;
+    }
 }

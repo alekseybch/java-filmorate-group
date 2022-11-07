@@ -103,4 +103,25 @@ public class FilmService {
         films.delete(filmId);
         log.info("Фильм с id=" + filmId + " удален");
     }
+
+    public List<Film> searchFilms(String query, String by) {
+        List <Film> filmList;
+        switch (by) {
+            case "title,director" :
+            case "director,title" :
+                filmList = films.getFilmByTitleDirector(query);
+                log.info("Результат поиска фильмов по названию и режиссеру " + filmList.size());
+                return filmList;
+            case "director" :
+                filmList = films.getFilmByDirector(query);
+                log.info("Результат поиска фильмов по режиссеру " + filmList.size());
+                return filmList;
+            case "title" :
+                filmList = films.getFilmByTitle(query);
+                log.info("Результат поиска фильмов по названию " + filmList.size());
+                return filmList;
+            default:
+                return films.getFilmsList();
+        }
+    }
 }
