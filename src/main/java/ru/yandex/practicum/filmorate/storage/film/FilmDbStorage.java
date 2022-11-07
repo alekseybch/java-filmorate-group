@@ -14,7 +14,6 @@ import ru.yandex.practicum.filmorate.model.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Repository("FilmDbStorage")
 @Slf4j
@@ -160,27 +159,27 @@ public class FilmDbStorage implements FilmStorage{
                     " Невозможно получить список фильмов несуществующего режиссера с id= " + directorId;
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
-        String sqlQuery = "";
+        List<Film> films = null;
         switch (sortBy) {
             case "year":
-                sqlQuery = "SELECT f.*, m.mpa_name FROM film AS f " +
-                        "JOIN mpa AS m ON f.mpa = m.mpa_id " +
-                        "JOIN director_films AS df ON f.film_id = df.film_id " +
-                        "JOIN director AS d ON df.director_id = d.director_id WHERE d.director_id = ? " +
+                String sqlQuery = "SELECT f.*, m.mpa_name FROM film AS f " +
+                        "LEFT JOIN mpa AS m ON f.mpa = m.mpa_id " +
+                        "LEFT JOIN director_films AS df ON f.film_id = df.film_id " +
+                        "LEFT JOIN director AS d ON df.director_id = d.director_id WHERE d.director_id = ? " +
                         "ORDER BY EXTRACT(YEAR FROM CAST(release_date AS date))";
+                films = jdbcTemplate.query(sqlQuery, this::makeFilm, directorId);
                 break;
             case "likes":
                 sqlQuery = "SELECT f.*, m.mpa_name FROM film AS f " +
-                        "JOIN mpa AS m ON f.mpa = m.mpa_id " +
-                        "JOIN director_films AS df ON f.film_id = df.film_id " +
-                        "JOIN director AS d ON df.director_id = d.director_id " +
-                        "WHERE d.director_id = ?";
-                return jdbcTemplate.query(sqlQuery, this::makeFilm, directorId)
-                        .stream()
-                        .sorted((o1, o2) -> o2.getLikes().size() - o1.getLikes().size())
-                        .collect(Collectors.toList());
+                        "LEFT JOIN mpa AS m ON f.mpa = m.mpa_id " +
+                        "LEFT JOIN director_films AS df ON f.film_id = df.film_id " +
+                        "LEFT JOIN director AS d ON df.director_id = d.director_id " +
+                        "LEFT JOIN likes AS l ON f.film_id = l.film_id " +
+                        "WHERE d.director_id = ? GROUP BY f.film_id " +
+                        "ORDER BY COUNT(l.person_id) DESC";
+                films = jdbcTemplate.query(sqlQuery, this::makeFilm, directorId);
         }
-        return jdbcTemplate.query(sqlQuery, this::makeFilm, directorId);
+        return films;
     }
 
     @Override
