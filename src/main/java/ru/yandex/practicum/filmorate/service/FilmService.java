@@ -10,10 +10,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -68,18 +65,16 @@ public class FilmService {
         log.info("Пользователь c id=" + userId + " удалил лайк с фильма id= " + filmId);
     }
 
-    public List<Film> getSortedFilms(Integer count) throws ResponseStatusException {
+    public List<Film> getTopFilms(Integer count, Integer genreId, Integer year) throws ResponseStatusException {
         if (count <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "count не может быть отрицательным либо равен 0");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "count не может быть отрицательным либо равен 0");
         }
-        Comparator<Film> sortFilm = (f1, f2) -> {
-            Integer filmLikes1 = f1.getLikes().size();
-            Integer filmLikes2 = f2.getLikes().size();
-            return -1 * filmLikes1.compareTo(filmLikes2);
-
-        };
-        return films.getFilmsList().stream().sorted(sortFilm).limit(count)
-                .collect(Collectors.toCollection(ArrayList::new));
+        if (year != null && year < minDate.getYear()) {
+            log.warn("Год поиска не может быть раньше 1895\nТекущий год релиза: " + year);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Год поиска не может быть раньше 1895");
+        }
+        return films.getTopFilms(count, genreId, year);
     }
 
     public Film getFilm(Integer filmId) {
