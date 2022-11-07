@@ -50,9 +50,6 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void delete(User user) {}
-
-    @Override
     public void update(User user) {
         String sqlQuery = "UPDATE person " +
                 "SET email = ?, login = ?, name = ?, birthday = ? WHERE person_id = ?";
@@ -157,7 +154,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<Film> getRecommendations(int userId) {
-        List<Film> films = filmStorage.getFilmsList();
+        List<Film> films = filmStorage.getLikedFilms();
         List<Film> userLikes;
         Map<Integer, List<Film>> usersAndLikes = new HashMap<>();
         for (Film film : films) {

@@ -187,6 +187,15 @@ public class FilmDbStorage implements FilmStorage{
         }
     }
 
+    @Override
+    public List<Film> getLikedFilms() {
+        String sqlQuery = "SELECT film.*, mpa.mpa_name FROM film JOIN mpa ON film.mpa = mpa.mpa_id WHERE film_id IN (SELECT film_id FROM likes)";
+        //String sqlQuery = "SELECT * FROM film WHERE film_id IN (SELECT film_id FROM likes)";
+       // try {
+            return jdbcTemplate.query(sqlQuery, this::makeFilm);
+      //  }
+    }
+
     private Film makeFilm(ResultSet resultSet, int rowSum) throws SQLException {
         Film film = Film.builder()
                 .id(resultSet.getInt("film_id"))
@@ -196,7 +205,8 @@ public class FilmDbStorage implements FilmStorage{
                 .duration(resultSet.getInt("duration"))
                 .mpa(new Mpa(resultSet.getInt("mpa"), resultSet.getString("mpa_name")))
                 .build();
-        String sqlQuery = "SELECT person.* FROM likes JOIN person ON likes.person_id=person.person_id WHERE likes.film_id=?";
+        String sqlQuery = "SELECT person.* FROM likes JOIN person ON likes.person_id=person.person_id " +
+                "WHERE likes.film_id=?";
         film.getLikes().addAll(jdbcTemplate.query(sqlQuery, this::makeUser, film.getId()));
         film.getGenres().addAll(findGenresByFilmId(film.getId()));
         film.getDirectors().addAll(findDirectorsByFilmId(film.getId()));
