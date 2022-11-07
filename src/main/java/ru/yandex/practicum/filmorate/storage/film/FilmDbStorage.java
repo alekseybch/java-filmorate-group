@@ -27,7 +27,7 @@ public class FilmDbStorage implements FilmStorage{
     }
 
     @Override
-    public void add(Film film) throws ResponseStatusException {
+    public Film add(Film film) throws ResponseStatusException {
         if (dbContainsFilm(film)) {
             log.warn("Такой фильм уже есть");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Такой фильм уже есть");
@@ -54,6 +54,8 @@ public class FilmDbStorage implements FilmStorage{
                 );
             }
         }
+        log.info("Фильм {} сохранен", film);
+        return getFilm(filmId);
     }
 
     @Override
@@ -85,6 +87,14 @@ public class FilmDbStorage implements FilmStorage{
             film.getDirectors().forEach(director -> jdbcTemplate.update(sqlQuery3, film.getId(), director.getId()));
         }
         return getFilm(film.getId());
+    }
+
+    @Override
+    public void delete(Integer filmId) {
+        String sqlQuery = "DELETE FROM film WHERE film_id = ?";
+        if (jdbcTemplate.update(sqlQuery, filmId) == 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильма с id=" + filmId + " нет");
+        }
     }
 
     public List<Film> getFilmsList() {

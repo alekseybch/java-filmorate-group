@@ -27,9 +27,7 @@ public class UserService {
             user.setName(user.getLogin());
             log.debug("Имя пользователя пустое. Был использован логин");
         }
-        users.add(user);
-        log.info("Пользователь {} сохранен", user);
-        return user;
+        return users.add(user);
     }
 
     public User updateUser(User user) throws ResponseStatusException {
@@ -62,8 +60,7 @@ public class UserService {
                     "id и friendId не могут быть отрицательныи либо равены 0");
         }
         if (userId.equals(friendId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Невозможно удалить из друзей самого себя");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Невозможно удалить из друзей самого себя");
         }
         users.deleteFriend(userId, friendId);
         log.info("Пользователь с id=" + userId + " удалил пользователя с id=" + friendId);
@@ -75,8 +72,7 @@ public class UserService {
                     "id и friendId не могут быть отрицательныи либо равены 0");
         }
         if (userId.equals(friendId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Невозможно запросить общих друзей самого себя");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Невозможно запросить общих друзей самого себя");
         }
         return  users.getCommonFriends(userId, friendId);
     }
@@ -92,9 +88,17 @@ public class UserService {
 
     public User getUser(Integer userId) {
         if (userId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,  "id не может быть отрицательным либо равен 0");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "id не может быть отрицательным либо равен 0");
         }
         return users.getUser(userId);
+    }
+
+    public void delete(Integer userId) {
+        if (userId <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "id не может быть отрицательным либо равен 0");
+        }
+        users.delete(userId);
+        log.info("Пользователь с id=" + userId + " удален");
     }
 
     public List<Film> getRecommendations(Integer userId) {
