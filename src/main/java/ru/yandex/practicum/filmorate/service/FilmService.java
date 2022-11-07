@@ -10,7 +10,10 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -29,9 +32,8 @@ public class FilmService {
             log.warn("Дата релиза не может быть раньше 28.12.1895\nТекущая дата релиза: " + film.getReleaseDate());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Дата релиза не может быть раньше 28.12.1895");
         }
-        films.add(film);
-        log.info("Фильм {} сохранен", film);
-        return film;
+
+        return films.add(film);
     }
 
     public Film updateFilm(Film film) throws ResponseStatusException {
@@ -80,10 +82,29 @@ public class FilmService {
 
     public Film getFilm(Integer filmId) {
         if (filmId <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "id не может быть отрицательным либо равен 0");
+        }
+        return films.getFilm(filmId);
+    }
+
+    public List<Film> getSortedDirectorFilms(Integer directorId, String sortBy) {
+        if (directorId <= 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "id не может быть отрицательным либо равен 0");
         }
-        return films.getFilm(filmId);
+        if (!(sortBy.equals("year") || sortBy.equals("likes"))) {
+            log.warn("Невозможно отсортировать по: " + sortBy);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Сортировка может быть только по year или likes");
+        }
+        return films.getSortedDirectorFilms(directorId, sortBy);
+    }
+
+    public void deleteFilm(Integer filmId) {
+        if (filmId <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "id не может быть отрицательным либо равен 0");
+        }
+        films.delete(filmId);
+        log.info("Фильм с id=" + filmId + " удален");
     }
 
     public List<Film> getSortedDirectorFilms(Integer directorId, String sortBy) {
