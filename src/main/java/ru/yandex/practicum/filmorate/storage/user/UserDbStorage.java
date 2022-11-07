@@ -27,7 +27,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void add(User user) {
+    public User add(User user) {
         if (dbContainsUser(user)) {
             log.warn("Такой пользователь уже есть");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Такой пользователь уже есть");
@@ -36,10 +36,18 @@ public class UserDbStorage implements UserStorage {
         user.setId(userId);
         String sqlQuery = "INSERT INTO friend_request (sender_id, addressee_id) VALUES (?, ?)";
         user.getFriends().stream().map(friend -> jdbcTemplate.update(sqlQuery, userId, friend));
+        log.info("Пользователь {} сохранен", user);
+        return getUser(userId);
     }
 
-    public void delete(User user) {
+    @Override
+    public void delete(Integer userId) {
+        String sqlQuery = "DELETE FROM person WHERE person_id = ?";
+        if (jdbcTemplate.update(sqlQuery, userId) == 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователя с id=" + userId + " нет");
+        }
     }
+
     @Override
     public void update(User user) {
         String sqlQuery = "UPDATE person " +
