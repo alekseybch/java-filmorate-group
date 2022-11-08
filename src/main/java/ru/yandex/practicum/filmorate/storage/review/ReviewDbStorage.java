@@ -70,7 +70,7 @@ public class ReviewDbStorage implements ReviewStorage{
                     " Невозможно запросить отзыв которого не существует.";
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
-        String sql = "SELECT R.REVIEW_ID, R.CONTENT, R.IS_POSITIVE, R.USER_ID, R.FILM_ID, " +
+        String sql = "SELECT R.REVIEW_ID, R.CONTENT, R.IS_POSITIVE, R.PERSON_ID, R.FILM_ID, " +
                 "(SUM(CASE WHEN RL.IS_POSITIVE = TRUE THEN 1 ELSE 0 END) - " +
                 "SUM(CASE WHEN RL.IS_POSITIVE = FALSE THEN 1 ELSE 0 END)) AS USEFUL " +
                 "FROM REVIEWS AS R " +
@@ -87,7 +87,7 @@ public class ReviewDbStorage implements ReviewStorage{
                     " Невозможно запросить фильм которого не существует.";
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
-        String sql = "SELECT R.REVIEW_ID, R.CONTENT, R.IS_POSITIVE, R.USER_ID, R.FILM_ID, " +
+        String sql = "SELECT R.REVIEW_ID, R.CONTENT, R.IS_POSITIVE, R.PERSON_ID, R.FILM_ID, " +
                 "(SUM(CASE WHEN RL.IS_POSITIVE = TRUE THEN 1 ELSE 0 END) - " +
                 "SUM(CASE WHEN RL.IS_POSITIVE = FALSE THEN 1 ELSE 0 END)) AS USEFUL " +
                 "FROM REVIEWS AS R " +
@@ -101,7 +101,7 @@ public class ReviewDbStorage implements ReviewStorage{
 
     @Override
     public List<Review> getAllReviewsWithLimit(Integer count) {
-        String sql = "SELECT R.REVIEW_ID, R.CONTENT, R.IS_POSITIVE, R.USER_ID, R.FILM_ID, " +
+        String sql = "SELECT R.REVIEW_ID, R.CONTENT, R.IS_POSITIVE, R.PERSON_ID, R.FILM_ID, " +
                 "(SUM(CASE WHEN RL.IS_POSITIVE = TRUE THEN 1 ELSE 0 END) - " +
                 "SUM(CASE WHEN RL.IS_POSITIVE = FALSE THEN 1 ELSE 0 END)) AS USEFUL " +
                 "FROM REVIEWS AS R " +
@@ -113,7 +113,7 @@ public class ReviewDbStorage implements ReviewStorage{
     }
 
     private boolean dbContainsReview(Integer reviewId) {
-        String sql = "SELECT R.REVIEW_ID, R.CONTENT, R.IS_POSITIVE, R.USER_ID, R.FILM_ID, " +
+        String sql = "SELECT R.REVIEW_ID, R.CONTENT, R.IS_POSITIVE, R.PERSON_ID, R.FILM_ID, " +
                 "(SUM(CASE WHEN RL.IS_POSITIVE = TRUE THEN 1 ELSE 0 END) - " +
                 "SUM(CASE WHEN RL.IS_POSITIVE = FALSE THEN 1 ELSE 0 END)) AS USEFUL " +
                 "FROM REVIEWS AS R " +
@@ -153,7 +153,7 @@ public class ReviewDbStorage implements ReviewStorage{
         int id = rs.getInt("review_id");
         String content = rs.getString("content");
         boolean isPositive = rs.getBoolean("is_positive");
-        Integer userId = rs.getInt("user_id");
+        Integer userId = rs.getInt("person_id");
         Integer filmId = rs.getInt("film_id");
         Integer useful = rs.getInt("useful");
         return new Review(id, content, isPositive, userId, filmId, useful);

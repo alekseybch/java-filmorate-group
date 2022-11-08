@@ -33,7 +33,7 @@ public class Review {
         Map<String, Object> values = new HashMap<>();
         values.put("content", content);
         values.put("is_positive", isPositive);
-        values.put("user_id", userId);
+        values.put("person_id", userId);
         values.put("film_id", filmId);
         return values;
     }

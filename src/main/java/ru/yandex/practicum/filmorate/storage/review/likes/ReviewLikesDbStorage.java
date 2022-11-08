@@ -30,7 +30,7 @@ public class ReviewLikesDbStorage implements ReviewLikesStorage {
                     " Невозможно удалить лайк пользователяб которого не существует.";
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
-        String sql = "INSERT INTO REVIEW_LIKES (REVIEW_ID, USER_ID, IS_POSITIVE) " +
+        String sql = "INSERT INTO REVIEW_LIKES (REVIEW_ID, PERSON_ID, IS_POSITIVE) " +
                 "VALUES (?, ?, ?)";
         jdbcTemplate.update(sql, reviewId, userId, is_positive);
     }
@@ -47,7 +47,7 @@ public class ReviewLikesDbStorage implements ReviewLikesStorage {
                     " Невозможно удалить лайк пользователяб которого не существует.";
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
-        String sql = "DELETE FROM REVIEW_LIKES WHERE REVIEW_ID = ? AND USER_ID = ?";
+        String sql = "DELETE FROM REVIEW_LIKES WHERE REVIEW_ID = ? AND PERSON_ID = ?";
         jdbcTemplate.update(sql, reviewId, userId);
     }
 
@@ -62,7 +62,7 @@ public class ReviewLikesDbStorage implements ReviewLikesStorage {
     }
 
     private boolean dbContainsReview(Integer reviewId) {
-        String sql = "SELECT R.REVIEW_ID, R.CONTENT, R.IS_POSITIVE, R.USER_ID, R.FILM_ID, " +
+        String sql = "SELECT R.REVIEW_ID, R.CONTENT, R.IS_POSITIVE, R.PERSON_ID, R.FILM_ID, " +
                 "(SUM(CASE WHEN RL.IS_POSITIVE = TRUE THEN 1 ELSE 0 END) - " +
                 "SUM(CASE WHEN RL.IS_POSITIVE = FALSE THEN 1 ELSE 0 END)) AS USEFUL " +
                 "FROM REVIEWS AS R " +
@@ -91,7 +91,7 @@ public class ReviewLikesDbStorage implements ReviewLikesStorage {
         int id = rs.getInt("review_id");
         String content = rs.getString("content");
         boolean isPositive = rs.getBoolean("is_positive");
-        Integer userId = rs.getInt("user_id");
+        Integer userId = rs.getInt("person_id");
         Integer filmId = rs.getInt("film_id");
         Integer useful = rs.getInt("useful");
         return new Review(id, content, isPositive, userId, filmId, useful);
