@@ -17,7 +17,4 @@ public interface ReviewStorage {
     List<Review> getReviewsForFilm(Integer filmId, Integer count);
 
     List<Review> getAllReviewsWithLimit(Integer count);
-
-    List<Review> getAllReviews();
-    boolean dbContainsReview(Integer reviewId);
 }
