@@ -96,11 +96,12 @@ public class FilmDbStorage implements FilmStorage{
         }
     }
 
+    @Override
     public List<Film> getFilmsList() {
         String sqlQuery = "SELECT film.*, mpa.mpa_name FROM film JOIN mpa ON film.mpa = mpa.mpa_id";
         return jdbcTemplate.query(sqlQuery, this::makeFilm);
     }
-
+    @Override
     public List<Film> getTopFilms(Integer count, Integer genreId, Integer year) {
         if (genreId != null && !dbContainsGenre(genreId)) {
             String message = "Ошибка запроса списка популярных фильмов по жанру!" +
