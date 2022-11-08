@@ -128,7 +128,7 @@ public class ReviewDbStorage implements ReviewStorage{
         }
     }
 
-    public boolean dbContainsFilm(Integer filmId) {
+    private boolean dbContainsFilm(Integer filmId) {
         String sqlQuery = "SELECT f.*, mpa.mpa_name FROM FILM AS f JOIN mpa ON f.mpa = mpa.mpa_id " +
                 "WHERE f.film_id = ?";
         try {
