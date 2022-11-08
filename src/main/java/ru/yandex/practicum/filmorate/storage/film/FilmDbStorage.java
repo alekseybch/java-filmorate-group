@@ -348,10 +348,8 @@ public class FilmDbStorage implements FilmStorage{
     @Override
     public List<Film> getFilmByTitleDirector(String titleDirector) {
         List<Film> filmList;
-        String directorName = titleDirector.toLowerCase();
-        filmList = getFilmByDirector(directorName);
-        String filmName = titleDirector.substring(0,1).toUpperCase() + titleDirector.substring(1).toLowerCase();
-        filmList.addAll(getFilmByTitle(filmName));
+        filmList = getFilmByDirector(titleDirector);
+        filmList.addAll(getFilmByTitle(titleDirector));
         return filmList;
     }
 }
