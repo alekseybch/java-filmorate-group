@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -45,6 +46,14 @@ public class FilmService {
     public List<Film> getFilms() {
         log.info("Текущее кол-во фильмов: " + films.getFilmsList().size());
         return films.getFilmsList();
+    }
+
+    public List<Film> getCommonsFilms(Integer userId,Integer friendId){
+        log.info("Общие фильмы пользователя id = {},с другом id = {} {}",userId,friendId,films.getCommonFilms(userId, friendId));
+        return films.getCommonFilms(userId,friendId)
+                .stream()
+                .sorted(((o1, o2) -> o2.getLikes().size() - o1.getLikes().size()))
+                .collect(Collectors.toList());
     }
 
     public void addLike(Integer userId, Integer filmId) throws ResponseStatusException {

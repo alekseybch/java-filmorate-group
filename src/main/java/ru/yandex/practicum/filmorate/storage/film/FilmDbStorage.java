@@ -101,6 +101,27 @@ public class FilmDbStorage implements FilmStorage{
         return jdbcTemplate.query(sqlQuery, this::makeFilm);
     }
 
+    public List<Film> getCommonFilms(Integer userId,Integer friendId){
+        if (!dbContainsUser(userId)) {
+            String message = "Ошибка запроса списка общих фильмов!" +
+                    " Невозможно получить список фильмов несуществующего пользователя с id=" + userId;
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
+        }
+        if (!dbContainsUser(friendId)) {
+            String message = "Ошибка запроса списка общих фильмов!" +
+                    " Невозможно получить список фильмов несуществующего пользователя с id=" + friendId;
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
+        }
+        String sqlQuery = "select *" +
+                "from FILM f " +
+                "left join MPA m on (f.MPA = m.MPA_ID) " +
+                "join LIKES lu on (lu.FILM_ID = f.FILM_ID) " +
+                "join LIKES lf on (lf.FILM_ID = f.FILM_ID) " +
+                "where lu.PERSON_ID = ? " +
+                "  AND lf.PERSON_ID = ?";
+        return jdbcTemplate.query(sqlQuery, this::makeFilm,userId,friendId);
+    }
+
     public List<Film> getTopFilms(Integer count, Integer genreId, Integer year) {
         if (genreId != null && !dbContainsGenre(genreId)) {
             String message = "Ошибка запроса списка популярных фильмов по жанру!" +
