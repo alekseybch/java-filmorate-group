@@ -328,7 +328,7 @@ public class FilmDbStorage implements FilmStorage{
     private Director makeDirector(ResultSet resultSet, int rowSum) throws SQLException {
         return new Director(resultSet.getInt("director_id"), resultSet.getString("director_name"));
     }
-
+    @Override
     public List<Film> getFilmByTitle(String filmName) {
         String str = filmName.substring(0,1).toUpperCase() + filmName.substring(1).toLowerCase();
         String sqlQuery = "SELECT F.*, M.mpa_name FROM FILM AS F JOIN MPA AS M on F.MPA = M.MPA_ID WHERE F.NAME LIKE ? ";
