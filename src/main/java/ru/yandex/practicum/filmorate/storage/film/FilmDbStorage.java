@@ -107,6 +107,7 @@ public class FilmDbStorage implements FilmStorage{
                     " Невозможно получить список фильмов несуществующего жанра с id=" + genreId;
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
+        log.warn("Запрос топ {} фильмов c фильтрацией year={}, genreId={}", count, year, genreId);
         if (genreId != null && year != null) {
             String sqlQuery = "SELECT f.*, m.mpa_name FROM film AS f " +
                     "LEFT JOIN mpa AS m ON f.mpa = m.mpa_id " +
@@ -159,7 +160,7 @@ public class FilmDbStorage implements FilmStorage{
                     " Невозможно получить список фильмов несуществующего режиссера с id= " + directorId;
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
-        List<Film> films = null;
+        log.warn("Запрос на сортировку фильмов режиссера id={} по типу сортировки {}", directorId, sortBy);
         switch (sortBy) {
             case "year":
                 String sqlQuery = "SELECT f.*, m.mpa_name FROM film AS f " +
@@ -167,8 +168,7 @@ public class FilmDbStorage implements FilmStorage{
                         "LEFT JOIN director_films AS df ON f.film_id = df.film_id " +
                         "LEFT JOIN director AS d ON df.director_id = d.director_id WHERE d.director_id = ? " +
                         "ORDER BY EXTRACT(YEAR FROM CAST(release_date AS date))";
-                films = jdbcTemplate.query(sqlQuery, this::makeFilm, directorId);
-                break;
+                return jdbcTemplate.query(sqlQuery, this::makeFilm, directorId);
             case "likes":
                 sqlQuery = "SELECT f.*, m.mpa_name FROM film AS f " +
                         "LEFT JOIN mpa AS m ON f.mpa = m.mpa_id " +
@@ -177,9 +177,11 @@ public class FilmDbStorage implements FilmStorage{
                         "LEFT JOIN likes AS l ON f.film_id = l.film_id " +
                         "WHERE d.director_id = ? GROUP BY f.film_id " +
                         "ORDER BY COUNT(l.person_id) DESC";
-                films = jdbcTemplate.query(sqlQuery, this::makeFilm, directorId);
+                return jdbcTemplate.query(sqlQuery, this::makeFilm, directorId);
+            default:
+                log.warn("Невозможно отсортировать по: " + sortBy);
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Сортировка может быть только по year или likes");
         }
-        return films;
     }
 
     @Override
