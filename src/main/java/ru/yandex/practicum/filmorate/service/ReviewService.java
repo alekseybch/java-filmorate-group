@@ -2,13 +2,12 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Review;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.review.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.review.likes.ReviewLikesStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
-import ru.yandex.practicum.filmorate.validation.Validation;
 
 import java.util.List;
 
@@ -21,51 +20,72 @@ public class ReviewService {
 
     private final ReviewLikesStorage reviewLikesStorage;
 
-    private final UserStorage userStorage;
-
-    private final FilmStorage filmStorage;
-
     public Review addReview(Review review) {
-        Validation.validateUserId(userStorage, review.getUserId());
-        Validation.validateFilmId(filmStorage, review.getFilmId());
+        validateFilmId(review.getFilmId());
+        validateUserId(review.getUserId());
         Review reviewWithId = reviewStorage.addReview(review);
         return getReviewById(reviewWithId.getReviewId());
     }
 
     public Review updateReview(Review review) {
-        Validation.validateReviewId(reviewStorage, review.getReviewId());
+        validateReviewId(review.getReviewId());
         return reviewStorage.updateReview(review);
     }
 
     public void deleteReview(Integer reviewId) {
-        Validation.validateReviewId(reviewStorage, reviewId);
+        validateReviewId(reviewId);
         reviewStorage.deleteReview(reviewId);
     }
 
     public Review getReviewById(Integer reviewId) {
-        Validation.validateReviewId(reviewStorage, reviewId);
+        validateReviewId(reviewId);
         return reviewStorage.getReviewById(reviewId);
     }
 
     public List<Review> getReviewsForFilm(Integer filmId, Integer count) {
-        Validation.validateCountOfLimit(count);
+        if (count <= 0) {
+            log.warn("Пользователь ввёл неверное значение количества выводимых строк = " + count);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Пользователь ввёл неверное значение количества выводимых строк = " + count);
+        }
         if (filmId == null) {
             return reviewStorage.getAllReviewsWithLimit(count);
         } else {
-            Validation.validateFilmId(filmStorage, filmId);
+            validateFilmId(filmId);
             return reviewStorage.getReviewsForFilm(filmId, count);
         }
     }
 
     public void addLike(Integer reviewId, Integer userId, boolean isPositive) {
-        Validation.validateReviewId(reviewStorage, reviewId);
-        Validation.validateUserId(userStorage, userId);
+        validateReviewId(reviewId);
+        validateUserId(userId);
         reviewLikesStorage.addLike(reviewId, userId, isPositive);
     }
 
     public void deleteLike(Integer reviewId, Integer userId) {
-        Validation.validateReviewId(reviewStorage, reviewId);
-        Validation.validateUserId(userStorage, userId);
+        validateReviewId(reviewId);
+        validateUserId(userId);
         reviewLikesStorage.deleteLike(reviewId, userId);
+    }
+
+    private void validateReviewId(Integer reviewId) {
+        if (reviewId <= 0) {
+            log.warn("Пользователь ввёл неверный id отзыва = " + reviewId);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Отзыв с id = " + reviewId + " не найден");
+        }
+    }
+
+    private void validateFilmId(Integer filmId) {
+        if (filmId <= 0) {
+            log.warn("Пользователь ввёл неверный id фильма = " + filmId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм с id = " + filmId + " не найден");
+        }
+    }
+
+    private void validateUserId(Integer userId) {
+        if (userId <= 0) {
+            log.warn("Пользователь ввёл неверный id пользователя = " + userId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь с id = " + userId + " не найден");
+        }
     }
 }

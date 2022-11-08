@@ -23,6 +23,4 @@ public interface FilmStorage {
 
     void delete(Integer filmId);
 
-    boolean dbContainsFilm(Integer filmId);
-
 }

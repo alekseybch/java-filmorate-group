@@ -20,27 +20,27 @@ public class ReviewController {
     @PostMapping
     public Review addReview(@Valid @RequestBody Review review) {
         Review addedReview = reviewService.addReview(review);
-        log.info("review with id = {} has been added", addedReview.getReviewId());
+        log.info("Отзыв с id = {} добавлен", addedReview.getReviewId());
         return addedReview;
     }
 
     @PutMapping
     public Review updateReview(@Valid @RequestBody Review review) {
         Review updatedReview = reviewService.updateReview(review);
-        log.info("review with id = {} has been updated", updatedReview.getReviewId());
+        log.info("Отзыв с id = {} обновлен", updatedReview.getReviewId());
         return updatedReview;
     }
 
     @DeleteMapping("/{id}")
     public void deleteReview(@PathVariable("id") Integer reviewId) {
         reviewService.deleteReview(reviewId);
-        log.info("review with id = {} has been deleted", reviewId);
+        log.info("Отзыв с id = {} удален", reviewId);
     }
 
     @GetMapping("/{id}")
     public Review getReviewById(@PathVariable("id") Integer reviewId) {
         Review review = reviewService.getReviewById(reviewId);
-        log.info("review with id = {} has been found", reviewId);
+        log.info("Отзыв с id = {} найден", reviewId);
         return review;
     }
 
@@ -49,7 +49,7 @@ public class ReviewController {
                                           @RequestParam(defaultValue = "10") Integer count) {
         List<Review> reviews = reviewService.getReviewsForFilm(filmId, count);
         if (!reviews.isEmpty()) {
-            log.info("amount of reviews is {}, id of the most useful review is {}", reviews.size(), reviews.get(0).getReviewId());
+            log.info("Количество отзывов {}, id самого полезного отзыва {}", reviews.size(), reviews.get(0).getReviewId());
         }
         return reviews;
     }
@@ -57,24 +57,24 @@ public class ReviewController {
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable("id") Integer reviewId, @PathVariable Integer userId) {
         reviewService.addLike(reviewId, userId, true);
-        log.info("like is added");
+        log.info("добавлен лайк");
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable("id") Integer reviewId, @PathVariable Integer userId) {
         reviewService.deleteLike(reviewId, userId);
-        log.info("like is deleted");
+        log.info("удален лайк");
     }
 
     @PutMapping("/{id}/dislike/{userId}")
     public void addDislike(@PathVariable("id") Integer reviewId, @PathVariable Integer userId) {
         reviewService.addLike(reviewId, userId, false);
-        log.info("dislike is added");
+        log.info("добавлен дизлайк");
     }
 
     @DeleteMapping("/{id}/dislike/{userId}")
     public void deleteDislike(@PathVariable("id") Integer reviewId, @PathVariable Integer userId) {
         reviewService.deleteLike(reviewId, userId);
-        log.info("dislike is deleted");
+        log.info("удален дизлайк");
     }
 }
