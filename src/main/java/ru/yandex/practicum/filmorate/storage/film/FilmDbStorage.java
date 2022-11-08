@@ -112,13 +112,16 @@ public class FilmDbStorage implements FilmStorage{
                     " Невозможно получить список фильмов несуществующего пользователя с id=" + friendId;
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
-        String sqlQuery = "select *" +
-                "from FILM f " +
-                "left join MPA m on (f.MPA = m.MPA_ID) " +
-                "join LIKES lu on (lu.FILM_ID = f.FILM_ID) " +
-                "join LIKES lf on (lf.FILM_ID = f.FILM_ID) " +
-                "where lu.PERSON_ID = ? " +
-                "  AND lf.PERSON_ID = ?";
+        String sqlQuery = "SELECT f.*, m.mpa_name " +
+                "FROM film AS f " +
+                "LEFT JOIN mpa AS m ON f.mpa = m.mpa_id " +
+                "LEFT JOIN likes AS l on f.film_id = l.film_id " +
+                "WHERE f.film_id IN (SELECT f.film_id FROM film AS f " +
+                "LEFT JOIN likes lu on lu.film_id = f.film_id " +
+                "LEFT JOIN likes lf on lf.film_id = f.film_id " +
+                "WHERE lu.person_id = ? AND lf.person_id = ?) " +
+                "GROUP BY f.film_id " +
+                "ORDER BY COUNT(l.person_id) DESC";
         return jdbcTemplate.query(sqlQuery, this::makeFilm,userId,friendId);
     }
 

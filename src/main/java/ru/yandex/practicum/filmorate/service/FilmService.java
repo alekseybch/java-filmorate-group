@@ -50,10 +50,7 @@ public class FilmService {
 
     public List<Film> getCommonsFilms(Integer userId,Integer friendId){
         log.info("Общие фильмы пользователя id = {},с другом id = {} {}",userId,friendId,films.getCommonFilms(userId, friendId));
-        return films.getCommonFilms(userId,friendId)
-                .stream()
-                .sorted(((o1, o2) -> o2.getLikes().size() - o1.getLikes().size()))
-                .collect(Collectors.toList());
+        return films.getCommonFilms(userId,friendId);
     }
 
     public void addLike(Integer userId, Integer filmId) throws ResponseStatusException {
