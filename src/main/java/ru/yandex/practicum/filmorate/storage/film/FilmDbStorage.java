@@ -102,6 +102,7 @@ public class FilmDbStorage implements FilmStorage{
         return jdbcTemplate.query(sqlQuery, this::makeFilm);
     }
 
+    @Override
     public List<Film> getCommonFilms(Integer userId,Integer friendId){
         if (!dbContainsUser(userId)) {
             String message = "Ошибка запроса списка общих фильмов!" +
