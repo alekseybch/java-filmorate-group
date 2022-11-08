@@ -11,6 +11,8 @@ public interface FilmStorage {
 
     List<Film> getFilmsList();
 
+    List<Film> getCommonFilms(Integer userId, Integer friendId);
+
     void addLike(Integer userId, Integer filmId);
 
     void deleteLike(Integer userId, Integer filmId);
@@ -22,4 +24,5 @@ public interface FilmStorage {
     List<Film> getSortedDirectorFilms(Integer directorId, String sortBy);
 
     void delete(Integer filmId);
+
 }

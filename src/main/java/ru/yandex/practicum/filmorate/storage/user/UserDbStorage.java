@@ -192,7 +192,8 @@ public class UserDbStorage implements UserStorage {
         }
     }
 
-    private boolean dbContainsUser(Integer userId) {
+    @Override
+    public boolean dbContainsUser(Integer userId) {
         String sqlQuery = "SELECT * FROM person WHERE person_id = ?";
         try {
             jdbcTemplate.queryForObject(sqlQuery, this::makeUser, userId);
