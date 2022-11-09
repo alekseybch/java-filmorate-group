@@ -47,6 +47,11 @@ public class FilmService {
         return films.getFilmsList();
     }
 
+    public List<Film> getCommonsFilms(Integer userId,Integer friendId){
+        log.info("Общие фильмы пользователя id = {},с другом id = {} {}",userId,friendId,films.getCommonFilms(userId, friendId));
+        return films.getCommonFilms(userId,friendId);
+    }
+
     public void addLike(Integer userId, Integer filmId) throws ResponseStatusException {
         if (userId <=0 || filmId <= 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -88,10 +93,6 @@ public class FilmService {
         if (directorId <= 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "id не может быть отрицательным либо равен 0");
-        }
-        if (!(sortBy.equals("year") || sortBy.equals("likes"))) {
-            log.warn("Невозможно отсортировать по: " + sortBy);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Сортировка может быть только по year или likes");
         }
         return films.getSortedDirectorFilms(directorId, sortBy);
     }
