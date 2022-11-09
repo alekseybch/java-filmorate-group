@@ -252,6 +252,42 @@ public class FilmDbStorage implements FilmStorage{
     }
 
     @Override
+    public List<Film> getFilmByTitle(String filmName) {
+        String sqlQuery = "SELECT f.*, m.mpa_name, l.person_id " +
+                "FROM film AS f " +
+                "JOIN mpa AS m on f.mpa = m.mpa_id " +
+                "LEFT JOIN likes l on f.film_id = l.film_id " +
+                "WHERE LOWER(f.name) LIKE ? " +
+                "GROUP BY f.film_id ORDER BY COUNT(l.person_id) DESC";
+        return jdbcTemplate.query(sqlQuery, this::makeFilm,  "%" + filmName + "%" );
+    }
+
+    @Override
+    public List<Film> getFilmByDirector(String directorName) {
+        String sqlQuery = "SELECT f.*, m.mpa_name, d.director_name " +
+                "FROM film AS f " +
+                "LEFT JOIN mpa AS M on f.mpa = m.mpa_id " +
+                "LEFT JOIN likes l on f.film_id = l.film_id " +
+                "LEFT JOIN director_films AS df ON f.film_id = df.film_id " +
+                "LEFT JOIN director AS d ON d.director_id = df.director_id " +
+                "WHERE LOWER(d.director_name) LIKE ? " +
+                "GROUP BY F.film_id ORDER BY COUNT(L.person_id) DESC ";
+        return jdbcTemplate.query(sqlQuery, this::makeFilm,  "%" + directorName + "%" );
+    }
+
+    @Override
+    public List<Film> getFilmByTitleDirector(String titleDirector) {
+        String sqlQuery = "SELECT F.*, M.mpa_name, D.DIRECTOR_NAME FROM film AS F " +
+                "LEFT JOIN MPA AS M on F.MPA = M.MPA_ID " +
+                "LEFT JOIN LIKES AS L on F.FILM_ID = L.FILM_ID " +
+                "LEFT JOIN director_films AS df ON f.film_id = df.film_id " +
+                "LEFT JOIN director AS d ON d.director_id = df.director_id " +
+                "WHERE LOWER(d.DIRECTOR_NAME) LIKE ? OR LOWER(F.NAME) LIKE ? " +
+                "GROUP BY F.film_id ORDER BY COUNT(L.person_id) DESC" ;
+        return jdbcTemplate.query(sqlQuery, this::makeFilm,  "%" + titleDirector + "%",  "%" + titleDirector + "%");
+    }
+
+    @Override
     public List<Film> getLikedFilms() {
         String sqlQuery = "SELECT film.*, mpa.mpa_name FROM film JOIN mpa ON film.mpa = mpa.mpa_id " +
                 "WHERE film_id IN (SELECT film_id FROM likes)";
