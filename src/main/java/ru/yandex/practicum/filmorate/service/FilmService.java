@@ -106,19 +106,20 @@ public class FilmService {
     }
 
     public List<Film> searchFilms(String query, String by) {
+        String str = query.toLowerCase();
         List <Film> filmList;
         switch (by) {
             case "title,director" :
             case "director,title" :
-                filmList = films.getFilmByTitleDirector(query);
+                filmList = films.getFilmByTitleDirector(str);
                 log.info("Результат поиска фильмов по названию и режиссеру " + filmList.size());
                 return filmList;
             case "director" :
-                filmList = films.getFilmByDirector(query);
+                filmList = films.getFilmByDirector(str);
                 log.info("Результат поиска фильмов по режиссеру " + filmList.size());
                 return filmList;
             case "title" :
-                filmList = films.getFilmByTitle(query);
+                filmList = films.getFilmByTitle(str);
                 log.info("Результат поиска фильмов по названию " + filmList.size());
                 return filmList;
             default:
