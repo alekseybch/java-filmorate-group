@@ -11,6 +11,8 @@ import ru.yandex.practicum.filmorate.model.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Repository
@@ -18,6 +20,8 @@ import java.util.*;
 public class ReviewDbStorage implements ReviewStorage {
 
     private final JdbcTemplate jdbcTemplate;
+
+    private final Date date = new Date();
 
     @Override
     public Review addReview(Review review) {
@@ -34,7 +38,7 @@ public class ReviewDbStorage implements ReviewStorage {
                 .usingGeneratedKeyColumns("review_id");
         int reviewId = simpleJdbcInsert.executeAndReturnKey(review.toMap()).intValue();
         review.setReviewId(reviewId);
-        addToFeedReviewCreate(reviewId, review.getUserId());
+        addToFeedReviewCreate(review.getReviewId(), review.getUserId());
         return review;
     }
 
@@ -49,32 +53,27 @@ public class ReviewDbStorage implements ReviewStorage {
         jdbcTemplate.update(sql, review.getContent(), review.getIsPositive(), review.getReviewId());
         Review review1 = getReviewById(review.getReviewId());
         addToFeedReviewUpdate(review1.getReviewId());
-        addToFeedReviewUpdate(review.getReviewId());
         return getReviewById(review.getReviewId());
     }
 
     private void addToFeedReviewUpdate(Integer reviewId) {
-        String sqlQuery = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp) " +
+        String sqlQuery = "INSERT INTO feed (person_id, event_type, operation,entity_id,time_stamp) " +
                 "VALUES (?, 'REVIEW', 'UPDATE', ?,?)";
-
-        Date date = new Date();
         jdbcTemplate.update(sqlQuery, getReviewById(reviewId).getUserId(),
-                reviewId, date.getTime());
+                reviewId, Date.from(Instant.now()));
     }
 
     private void addToFeedReviewCreate(Integer reviewId, Integer userId) {
-        String sql = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp) " +
+        String sql = "INSERT INTO feed (person_id, event_type, operation,entity_id,time_stamp) " +
                 "VALUES (?, 'REVIEW', 'ADD', ?,?)";
-        Date date = new Date();
-        jdbcTemplate.update(sql, userId, reviewId, date.getTime());
+        jdbcTemplate.update(sql, userId, reviewId, Date.from(Instant.now()));
     }
 
     private void addToFeedReviewDelete(Integer reviewId) {
-        String sqlQuery = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp)" +
+        String sqlQuery = "INSERT INTO feed (person_id, event_type, operation,entity_id,time_stamp)" +
                 " VALUES (?, 'REVIEW', 'REMOVE', ?,?)";
-        Date date = new Date();
         jdbcTemplate.update(sqlQuery, getReviewById(reviewId).getUserId(),
-                reviewId, date.getTime());
+                reviewId, Date.from(Instant.now()));
     }
 
     @Override

@@ -13,14 +13,14 @@ import ru.yandex.practicum.filmorate.model.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Repository("FilmDbStorage")
 @Slf4j
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
-
-    private final Date date = new Date();
 
     @Autowired
     public FilmDbStorage(JdbcTemplate jdbcTemplate) {
@@ -88,7 +88,6 @@ public class FilmDbStorage implements FilmStorage {
             film.getDirectors().forEach(director -> jdbcTemplate.update(sqlQuery3, film.getId(), director.getId()));
         }
         return getFilm(film.getId());
-
     }
 
     @Override
@@ -129,6 +128,7 @@ public class FilmDbStorage implements FilmStorage {
                 "ORDER BY COUNT(l.person_id) DESC";
         return jdbcTemplate.query(sqlQuery, this::makeFilm, userId, friendId);
     }
+
 
     @Override
     public List<Film> getTopFilms(Integer count, Integer genreId, Integer year) {
@@ -213,6 +213,7 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
+
     @Override
     public void addLike(Integer userId, Integer filmId) throws ResponseStatusException {
         if (!dbContainsUser(userId)) {
@@ -229,7 +230,6 @@ public class FilmDbStorage implements FilmStorage {
         try {
             addToFeedAddLike(userId, filmId);
             jdbcTemplate.update(sqlQuery, userId, filmId);
-            addToFeedAddLike(userId, filmId);
         } catch (DuplicateKeyException e) {
             String message = "Ошибка запроса добавления лайка фильму." +
                     " Попытка полькователем поставить лайк дважды одному фильму.";
@@ -408,14 +408,14 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private void addToFeedDeleteLike(Integer userId, Integer filmId) {
-        String sql = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp)" +
+        String sql = "INSERT INTO feed (person_id, event_type, operation,entity_id,time_stamp)" +
                 " VALUES (?, 'LIKE', 'REMOVE', ?, ?)";
-        jdbcTemplate.update(sql, userId, filmId, date.getTime());
+        jdbcTemplate.update(sql, userId, filmId, Date.from(Instant.now()));
     }
 
     private void addToFeedAddLike(Integer userId, Integer filmId) {
-        String sql = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp)" +
+        String sql = "INSERT INTO feed (person_id, event_type, operation,entity_id,time_stamp)" +
                 " VALUES (?, 'LIKE', 'ADD', ?, ?)";
-        jdbcTemplate.update(sql, userId, filmId, date.getTime());
+        jdbcTemplate.update(sql, userId, filmId, Date.from(Instant.now()));
     }
 }

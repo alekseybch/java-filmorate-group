@@ -14,9 +14,10 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
+import java.time.*;
 import java.util.List;
 
 @Repository("UserDbStorage")
@@ -24,7 +25,6 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final Date date = new Date();
 
     @Override
     public User add(User user) {
@@ -66,7 +66,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<Feed> getUserFeed(Integer userId) {
-        String sqlQuery = "SELECT * FROM feed WHERE user_id = ?";
+        String sqlQuery = "SELECT * FROM feed WHERE person_id = ?";
         return jdbcTemplate.query(sqlQuery, this::makeFeed, userId);
     }
 
@@ -84,7 +84,6 @@ public class UserDbStorage implements UserStorage {
         }
         String sqlQuery = "INSERT INTO friend_request (sender_id, addressee_id) VALUES (?, ?)";
         try {
-            addToFeedAddFriend(userId, friendId);
             jdbcTemplate.update(sqlQuery, userId, friendId);
             addToFeedAddFriend(userId, friendId);
         } catch (DuplicateKeyException e) {
@@ -116,19 +115,18 @@ public class UserDbStorage implements UserStorage {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "Лайка от пользователя с id=" + userId + " у фильма с id=" + friendId + " нет");
         }
-        addToFeedDeleteFriend(userId, friendId);
     }
 
     private void addToFeedDeleteFriend(Integer userId, Integer friendId) {
-        String sql = "INSERT INTO feed (user_id, event_type, operation, entity_id, time_stamp) " +
+        String sql = "INSERT INTO feed (person_id, event_type, operation, entity_id, time_stamp) " +
                 "VALUES (?, 'FRIEND', 'REMOVE', ?, ?)";
-        jdbcTemplate.update(sql, userId, friendId, date.getTime());
+        jdbcTemplate.update(sql, userId, friendId, Date.from(Instant.now()));
     }
 
     private void addToFeedAddFriend(Integer userId, Integer friendId) {
-        String sql = "INSERT INTO feed (user_id, event_type, operation, entity_id, time_stamp)" +
+        String sql = "INSERT INTO feed (person_id, event_type, operation, entity_id, time_stamp)" +
                 " VALUES (?, 'FRIEND', 'ADD', ?, ?)";
-        jdbcTemplate.update(sql, userId, friendId, date.getTime());
+        jdbcTemplate.update(sql, userId, friendId, Date.from(Instant.now()));
     }
 
     @Override
@@ -205,12 +203,12 @@ public class UserDbStorage implements UserStorage {
 
     private Feed makeFeed(ResultSet rs, int rowNum) throws SQLException {
         return Feed.builder()
-                .userId(rs.getInt("user_id"))
+                .userId(rs.getInt("person_id"))
                 .eventType(rs.getString("event_type"))
                 .operation(rs.getString("operation"))
                 .eventId(rs.getInt("event_id"))
                 .entityId(rs.getInt("entity_id"))
-                .timestamp(rs.getLong("time_stamp"))
+                .timestamp(rs.getDate("time_stamp"))
                 .build();
     }
 

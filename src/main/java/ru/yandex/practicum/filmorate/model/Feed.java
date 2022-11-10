@@ -1,10 +1,13 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 
 
 @Data
@@ -24,5 +27,7 @@ public class Feed {
     @NotNull
     private int entityId;
 
-    private long timestamp;
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
+    private Date timestamp;
+
 }
