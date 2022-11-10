@@ -223,8 +223,8 @@ public class FilmDbStorage implements FilmStorage {
         }
         String sqlQuery = "INSERT INTO likes (person_id, film_id) VALUES (?, ?)";
         try {
-            addToFeedAddLike(userId, filmId);
             jdbcTemplate.update(sqlQuery, userId, filmId);
+            addToFeedAddLike(userId, filmId);
         } catch (DuplicateKeyException e) {
             String message = "Ошибка запроса добавления лайка фильму." +
                     " Попытка полькователем поставить лайк дважды одному фильму.";

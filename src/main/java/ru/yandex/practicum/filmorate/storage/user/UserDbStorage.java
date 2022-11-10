@@ -87,8 +87,8 @@ public class UserDbStorage implements UserStorage {
         }
         String sqlQuery = "INSERT INTO friend_request (sender_id, addressee_id) VALUES (?, ?)";
         try {
-            addToFeedAddFriend(userId, friendId);
             jdbcTemplate.update(sqlQuery, userId, friendId);
+            addToFeedAddFriend(userId, friendId);
         } catch (DuplicateKeyException e) {
             String message = "Ошибка запроса добавления в друзья." +
                     " Невозможно добавить в друзья пользователя который уже в друзьях";
@@ -113,21 +113,21 @@ public class UserDbStorage implements UserStorage {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
         String sqlQuery = "DELETE FROM friend_request WHERE sender_id = ? AND addressee_id = ?";
-        addToFeedDeleteFriend(userId, friendId);
         if (jdbcTemplate.update(sqlQuery, userId, friendId) == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "Лайка от пользователя с id=" + userId + " у фильма с id=" + friendId + " нет");
         }
+        addToFeedDeleteFriend(userId, friendId);
     }
 
     private void addToFeedDeleteFriend(Integer userId, Integer friendId) {
-        String sql = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp) " +
+        String sql = "INSERT INTO feed (user_id, event_type, operation, entity_id, time_stamp) " +
                 "VALUES (?, 'FRIEND', 'REMOVE', ?, ?)";
         jdbcTemplate.update(sql, userId, friendId, date.getTime());
     }
 
     private void addToFeedAddFriend(Integer userId, Integer friendId) {
-        String sql = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp)" +
+        String sql = "INSERT INTO feed (user_id, event_type, operation, entity_id, time_stamp)" +
                 " VALUES (?, 'FRIEND', 'ADD', ?, ?)";
         jdbcTemplate.update(sql, userId, friendId, date.getTime());
     }

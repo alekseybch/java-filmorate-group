@@ -1,16 +1,18 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.List;
-import java.util.Map;
 
 public interface UserStorage {
-    void add(User user);
+    User add(User user);
 
-    void delete(User user);
+    void delete(Integer userId);
 
     void update(User user);
+
+    List<Feed> getUserFeed(Integer userId);
 
     List<User> getUsersList();
 
@@ -23,4 +25,6 @@ public interface UserStorage {
     List<User> getFriends(Integer friendId);
 
     User getUser(Integer userId);
+
+    boolean dbContainsUser(Integer userId);
 }
