@@ -103,7 +103,7 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(sqlQuery, this::makeFilm);
     }
 
-    @Override
+
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
         if (!dbContainsUser(userId)) {
             String message = "Ошибка запроса списка общих фильмов!" +
@@ -252,18 +252,6 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
-    private void addToFeedDeleteLike(Integer userId, Integer filmId) {
-        String sql = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp)" +
-                " VALUES (?, 'LIKE', 'REMOVE', ?, ?)";
-        jdbcTemplate.update(sql, userId, filmId, date.getTime());
-    }
-
-    private void addToFeedAddLike(Integer userId, Integer filmId) {
-        String sql = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp)" +
-                " VALUES (?, 'LIKE', 'ADD', ?, ?)";
-        jdbcTemplate.update(sql, userId, filmId, date.getTime());
-    }
-
     private Film makeFilm(ResultSet resultSet, int rowSum) throws SQLException {
         Film film = Film.builder()
                 .id(resultSet.getInt("film_id"))
@@ -368,5 +356,17 @@ public class FilmDbStorage implements FilmStorage {
 
     private Director makeDirector(ResultSet resultSet, int rowSum) throws SQLException {
         return new Director(resultSet.getInt("director_id"), resultSet.getString("director_name"));
+    }
+
+    private void addToFeedDeleteLike(Integer userId, Integer filmId) {
+        String sql = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp)" +
+                " VALUES (?, 'LIKE', 'REMOVE', ?, ?)";
+        jdbcTemplate.update(sql, userId, filmId, date.getTime());
+    }
+
+    private void addToFeedAddLike(Integer userId, Integer filmId) {
+        String sql = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp)" +
+                " VALUES (?, 'LIKE', 'ADD', ?, ?)";
+        jdbcTemplate.update(sql, userId, filmId, date.getTime());
     }
 }
