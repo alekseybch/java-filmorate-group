@@ -18,10 +18,6 @@ import java.util.*;
 public class ReviewDbStorage implements ReviewStorage {
 
     private final JdbcTemplate jdbcTemplate;
-<<<<<<< HEAD
-    private final Date date = new Date();
-=======
->>>>>>> origin/add-feed
 
     @Override
     public Review addReview(Review review) {
@@ -51,23 +47,17 @@ public class ReviewDbStorage implements ReviewStorage {
         }
         String sql = "UPDATE REVIEWS SET CONTENT = ?, IS_POSITIVE = ? WHERE REVIEW_ID = ?";
         jdbcTemplate.update(sql, review.getContent(), review.getIsPositive(), review.getReviewId());
-<<<<<<< HEAD
         Review review1 = getReviewById(review.getReviewId());
         addToFeedReviewUpdate(review1.getReviewId());
-=======
         addToFeedReviewUpdate(review.getReviewId());
->>>>>>> origin/add-feed
         return getReviewById(review.getReviewId());
     }
 
     private void addToFeedReviewUpdate(Integer reviewId) {
         String sqlQuery = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp) " +
                 "VALUES (?, 'REVIEW', 'UPDATE', ?,?)";
-<<<<<<< HEAD
 
-=======
         Date date = new Date();
->>>>>>> origin/add-feed
         jdbcTemplate.update(sqlQuery, getReviewById(reviewId).getUserId(),
                 reviewId, date.getTime());
     }
@@ -75,20 +65,14 @@ public class ReviewDbStorage implements ReviewStorage {
     private void addToFeedReviewCreate(Integer reviewId, Integer userId) {
         String sql = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp) " +
                 "VALUES (?, 'REVIEW', 'ADD', ?,?)";
-<<<<<<< HEAD
-=======
         Date date = new Date();
->>>>>>> origin/add-feed
         jdbcTemplate.update(sql, userId, reviewId, date.getTime());
     }
 
     private void addToFeedReviewDelete(Integer reviewId) {
         String sqlQuery = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp)" +
                 " VALUES (?, 'REVIEW', 'REMOVE', ?,?)";
-<<<<<<< HEAD
-=======
         Date date = new Date();
->>>>>>> origin/add-feed
         jdbcTemplate.update(sqlQuery, getReviewById(reviewId).getUserId(),
                 reviewId, date.getTime());
     }

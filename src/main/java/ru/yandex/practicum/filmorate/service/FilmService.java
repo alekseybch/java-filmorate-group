@@ -93,13 +93,10 @@ public class FilmService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "id не может быть отрицательным либо равен 0");
         }
-<<<<<<< HEAD
         if (!(sortBy.equals("year") || sortBy.equals("likes"))) {
             log.warn("Невозможно отсортировать по: " + sortBy);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Сортировка может быть только по year или likes");
         }
-=======
->>>>>>> origin/add-feed
         return films.getSortedDirectorFilms(directorId, sortBy);
     }
 
@@ -110,8 +107,6 @@ public class FilmService {
         films.delete(filmId);
         log.info("Фильм с id=" + filmId + " удален");
     }
-<<<<<<< HEAD
-=======
 
     public List<Film> searchFilms(String query, String by) {
         String str = query.toLowerCase();
@@ -134,5 +129,4 @@ public class FilmService {
                 return films.getFilmsList();
         }
     }
->>>>>>> origin/add-feed
 }

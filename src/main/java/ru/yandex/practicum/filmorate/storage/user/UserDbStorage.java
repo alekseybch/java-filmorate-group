@@ -16,15 +16,6 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-<<<<<<< HEAD
-=======
-import java.util.*;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
->>>>>>> origin/add-feed
 import java.util.Date;
 import java.util.List;
 
@@ -137,20 +128,6 @@ public class UserDbStorage implements UserStorage {
     private void addToFeedAddFriend(Integer userId, Integer friendId) {
         String sql = "INSERT INTO feed (user_id, event_type, operation, entity_id, time_stamp)" +
                 " VALUES (?, 'FRIEND', 'ADD', ?, ?)";
-        jdbcTemplate.update(sql, userId, friendId, date.getTime());
-    }
-
-    private void addToFeedDeleteFriend(Integer userId, Integer friendId) {
-        String sql = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp) " +
-                "VALUES (?, 'FRIEND', 'REMOVE', ?, ?)";
-        Date date = new Date();
-        jdbcTemplate.update(sql, userId, friendId, date.getTime());
-    }
-
-    private void addToFeedAddFriend(Integer userId, Integer friendId) {
-        String sql = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp)" +
-                " VALUES (?, 'FRIEND', 'ADD', ?, ?)";
-        Date date = new Date();
         jdbcTemplate.update(sql, userId, friendId, date.getTime());
     }
 

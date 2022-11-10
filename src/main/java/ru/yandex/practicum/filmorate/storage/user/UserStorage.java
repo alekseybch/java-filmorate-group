@@ -27,8 +27,4 @@ public interface UserStorage {
     User getUser(Integer userId);
 
     boolean dbContainsUser(Integer userId);
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/add-feed
 }
