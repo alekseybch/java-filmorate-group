@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -15,19 +16,24 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+<<<<<<< HEAD
+=======
+import java.util.*;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+>>>>>>> origin/add-feed
 import java.util.Date;
 import java.util.List;
 
 @Repository("UserDbStorage")
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
     private final Date date = new Date();
-
-    @Autowired
-    public UserDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public User add(User user) {
@@ -87,6 +93,7 @@ public class UserDbStorage implements UserStorage {
         }
         String sqlQuery = "INSERT INTO friend_request (sender_id, addressee_id) VALUES (?, ?)";
         try {
+            addToFeedAddFriend(userId, friendId);
             jdbcTemplate.update(sqlQuery, userId, friendId);
             addToFeedAddFriend(userId, friendId);
         } catch (DuplicateKeyException e) {
@@ -113,6 +120,7 @@ public class UserDbStorage implements UserStorage {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
         String sqlQuery = "DELETE FROM friend_request WHERE sender_id = ? AND addressee_id = ?";
+        addToFeedDeleteFriend(userId, friendId);
         if (jdbcTemplate.update(sqlQuery, userId, friendId) == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "Лайка от пользователя с id=" + userId + " у фильма с id=" + friendId + " нет");
@@ -129,6 +137,20 @@ public class UserDbStorage implements UserStorage {
     private void addToFeedAddFriend(Integer userId, Integer friendId) {
         String sql = "INSERT INTO feed (user_id, event_type, operation, entity_id, time_stamp)" +
                 " VALUES (?, 'FRIEND', 'ADD', ?, ?)";
+        jdbcTemplate.update(sql, userId, friendId, date.getTime());
+    }
+
+    private void addToFeedDeleteFriend(Integer userId, Integer friendId) {
+        String sql = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp) " +
+                "VALUES (?, 'FRIEND', 'REMOVE', ?, ?)";
+        Date date = new Date();
+        jdbcTemplate.update(sql, userId, friendId, date.getTime());
+    }
+
+    private void addToFeedAddFriend(Integer userId, Integer friendId) {
+        String sql = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp)" +
+                " VALUES (?, 'FRIEND', 'ADD', ?, ?)";
+        Date date = new Date();
         jdbcTemplate.update(sql, userId, friendId, date.getTime());
     }
 

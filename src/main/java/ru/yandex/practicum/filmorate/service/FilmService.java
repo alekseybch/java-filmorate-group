@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -20,7 +19,6 @@ public class FilmService {
     private final LocalDate minDate = LocalDate.of(1895, 12, 28);
 
     @Autowired
-
     public FilmService(@Qualifier("FilmDbStorage") FilmStorage films) {
         this.films = films;
     }
@@ -95,10 +93,13 @@ public class FilmService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "id не может быть отрицательным либо равен 0");
         }
+<<<<<<< HEAD
         if (!(sortBy.equals("year") || sortBy.equals("likes"))) {
             log.warn("Невозможно отсортировать по: " + sortBy);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Сортировка может быть только по year или likes");
         }
+=======
+>>>>>>> origin/add-feed
         return films.getSortedDirectorFilms(directorId, sortBy);
     }
 
@@ -109,4 +110,29 @@ public class FilmService {
         films.delete(filmId);
         log.info("Фильм с id=" + filmId + " удален");
     }
+<<<<<<< HEAD
+=======
+
+    public List<Film> searchFilms(String query, String by) {
+        String str = query.toLowerCase();
+        List <Film> filmList;
+        switch (by) {
+            case "title,director" :
+            case "director,title" :
+                filmList = films.getFilmByTitleDirector(str);
+                log.info("Результат поиска фильмов по названию и режиссеру " + filmList.size());
+                return filmList;
+            case "director" :
+                filmList = films.getFilmByDirector(str);
+                log.info("Результат поиска фильмов по режиссеру " + filmList.size());
+                return filmList;
+            case "title" :
+                filmList = films.getFilmByTitle(str);
+                log.info("Результат поиска фильмов по названию " + filmList.size());
+                return filmList;
+            default:
+                return films.getFilmsList();
+        }
+    }
+>>>>>>> origin/add-feed
 }

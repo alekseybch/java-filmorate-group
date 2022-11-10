@@ -25,4 +25,13 @@ public interface FilmStorage {
 
     void delete(Integer filmId);
 
+<<<<<<< HEAD
+=======
+    List<Film> getFilmByTitleDirector(String query);
+
+    List<Film> getFilmByDirector(String query);
+
+    List<Film> getFilmByTitle(String query);
+    List<Film> getLikedFilms();
+>>>>>>> origin/add-feed
 }

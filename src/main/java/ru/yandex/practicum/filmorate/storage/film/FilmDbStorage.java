@@ -88,6 +88,17 @@ public class FilmDbStorage implements FilmStorage {
             film.getDirectors().forEach(director -> jdbcTemplate.update(sqlQuery3, film.getId(), director.getId()));
         }
         return getFilm(film.getId());
+<<<<<<< HEAD
+    }
+
+    @Override
+    public void delete(Integer filmId) {
+        String sqlQuery = "DELETE FROM film WHERE film_id = ?";
+        if (jdbcTemplate.update(sqlQuery, filmId) == 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильма с id=" + filmId + " нет");
+        }
+=======
+>>>>>>> origin/add-feed
     }
 
     @Override
@@ -98,13 +109,18 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
+    @Override
     public List<Film> getFilmsList() {
         String sqlQuery = "SELECT film.*, mpa.mpa_name FROM film JOIN mpa ON film.mpa = mpa.mpa_id";
         return jdbcTemplate.query(sqlQuery, this::makeFilm);
     }
 
     @Override
+<<<<<<< HEAD
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+=======
+    public List<Film> getCommonFilms(Integer userId,Integer friendId){
+>>>>>>> origin/add-feed
         if (!dbContainsUser(userId)) {
             String message = "Ошибка запроса списка общих фильмов!" +
                     " Невозможно получить список фильмов несуществующего пользователя с id=" + userId;
@@ -128,6 +144,10 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(sqlQuery, this::makeFilm, userId, friendId);
     }
 
+<<<<<<< HEAD
+=======
+    @Override
+>>>>>>> origin/add-feed
     public List<Film> getTopFilms(Integer count, Integer genreId, Integer year) {
         if (genreId != null && !dbContainsGenre(genreId)) {
             String message = "Ошибка запроса списка популярных фильмов по жанру!" +
@@ -186,7 +206,11 @@ public class FilmDbStorage implements FilmStorage {
                     " Невозможно получить список фильмов несуществующего режиссера с id= " + directorId;
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
+<<<<<<< HEAD
         List<Film> films = null;
+=======
+        log.warn("Запрос на сортировку фильмов режиссера id={} по типу сортировки {}", directorId, sortBy);
+>>>>>>> origin/add-feed
         switch (sortBy) {
             case "year":
                 String sqlQuery = "SELECT f.*, m.mpa_name FROM film AS f " +
@@ -194,8 +218,12 @@ public class FilmDbStorage implements FilmStorage {
                         "LEFT JOIN director_films AS df ON f.film_id = df.film_id " +
                         "LEFT JOIN director AS d ON df.director_id = d.director_id WHERE d.director_id = ? " +
                         "ORDER BY EXTRACT(YEAR FROM CAST(release_date AS date))";
+<<<<<<< HEAD
                 films = jdbcTemplate.query(sqlQuery, this::makeFilm, directorId);
                 break;
+=======
+                return jdbcTemplate.query(sqlQuery, this::makeFilm, directorId);
+>>>>>>> origin/add-feed
             case "likes":
                 sqlQuery = "SELECT f.*, m.mpa_name FROM film AS f " +
                         "LEFT JOIN mpa AS m ON f.mpa = m.mpa_id " +
@@ -204,9 +232,17 @@ public class FilmDbStorage implements FilmStorage {
                         "LEFT JOIN likes AS l ON f.film_id = l.film_id " +
                         "WHERE d.director_id = ? GROUP BY f.film_id " +
                         "ORDER BY COUNT(l.person_id) DESC";
+<<<<<<< HEAD
                 films = jdbcTemplate.query(sqlQuery, this::makeFilm, directorId);
         }
         return films;
+=======
+                return jdbcTemplate.query(sqlQuery, this::makeFilm, directorId);
+            default:
+                log.warn("Невозможно отсортировать по: " + sortBy);
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Сортировка может быть только по year или likes");
+        }
+>>>>>>> origin/add-feed
     }
 
     @Override
@@ -223,8 +259,12 @@ public class FilmDbStorage implements FilmStorage {
         }
         String sqlQuery = "INSERT INTO likes (person_id, film_id) VALUES (?, ?)";
         try {
-            jdbcTemplate.update(sqlQuery, userId, filmId);
             addToFeedAddLike(userId, filmId);
+            jdbcTemplate.update(sqlQuery, userId, filmId);
+<<<<<<< HEAD
+            addToFeedAddLike(userId, filmId);
+=======
+>>>>>>> origin/add-feed
         } catch (DuplicateKeyException e) {
             String message = "Ошибка запроса добавления лайка фильму." +
                     " Попытка полькователем поставить лайк дважды одному фильму.";
@@ -252,6 +292,49 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
+    @Override
+    public List<Film> getFilmByTitle(String filmName) {
+        String sqlQuery = "SELECT f.*, m.mpa_name, l.person_id " +
+                "FROM film AS f " +
+                "JOIN mpa AS m on f.mpa = m.mpa_id " +
+                "LEFT JOIN likes l on f.film_id = l.film_id " +
+                "WHERE LOWER(f.name) LIKE ? " +
+                "GROUP BY f.film_id ORDER BY COUNT(l.person_id) DESC";
+        return jdbcTemplate.query(sqlQuery, this::makeFilm,  "%" + filmName + "%" );
+    }
+
+    @Override
+    public List<Film> getFilmByDirector(String directorName) {
+        String sqlQuery = "SELECT f.*, m.mpa_name, d.director_name " +
+                "FROM film AS f " +
+                "LEFT JOIN mpa AS M on f.mpa = m.mpa_id " +
+                "LEFT JOIN likes l on f.film_id = l.film_id " +
+                "LEFT JOIN director_films AS df ON f.film_id = df.film_id " +
+                "LEFT JOIN director AS d ON d.director_id = df.director_id " +
+                "WHERE LOWER(d.director_name) LIKE ? " +
+                "GROUP BY F.film_id ORDER BY COUNT(L.person_id) DESC ";
+        return jdbcTemplate.query(sqlQuery, this::makeFilm,  "%" + directorName + "%" );
+    }
+
+    @Override
+    public List<Film> getFilmByTitleDirector(String titleDirector) {
+        String sqlQuery = "SELECT F.*, M.mpa_name, D.DIRECTOR_NAME FROM film AS F " +
+                "LEFT JOIN MPA AS M on F.MPA = M.MPA_ID " +
+                "LEFT JOIN LIKES AS L on F.FILM_ID = L.FILM_ID " +
+                "LEFT JOIN director_films AS df ON f.film_id = df.film_id " +
+                "LEFT JOIN director AS d ON d.director_id = df.director_id " +
+                "WHERE LOWER(d.DIRECTOR_NAME) LIKE ? OR LOWER(F.NAME) LIKE ? " +
+                "GROUP BY F.film_id ORDER BY COUNT(L.person_id) DESC" ;
+        return jdbcTemplate.query(sqlQuery, this::makeFilm,  "%" + titleDirector + "%",  "%" + titleDirector + "%");
+    }
+
+    @Override
+    public List<Film> getLikedFilms() {
+        String sqlQuery = "SELECT film.*, mpa.mpa_name FROM film JOIN mpa ON film.mpa = mpa.mpa_id " +
+                "WHERE film_id IN (SELECT film_id FROM likes)";
+            return jdbcTemplate.query(sqlQuery, this::makeFilm);
+    }
+
     private Film makeFilm(ResultSet resultSet, int rowSum) throws SQLException {
         Film film = Film.builder()
                 .id(resultSet.getInt("film_id"))
@@ -261,7 +344,8 @@ public class FilmDbStorage implements FilmStorage {
                 .duration(resultSet.getInt("duration"))
                 .mpa(new Mpa(resultSet.getInt("mpa"), resultSet.getString("mpa_name")))
                 .build();
-        String sqlQuery = "SELECT person.* FROM likes JOIN person ON likes.person_id=person.person_id WHERE likes.film_id=?";
+        String sqlQuery = "SELECT person.* FROM likes JOIN person ON likes.person_id=person.person_id " +
+                "WHERE likes.film_id=?";
         film.getLikes().addAll(jdbcTemplate.query(sqlQuery, this::makeUser, film.getId()));
         film.getGenres().addAll(findGenresByFilmId(film.getId()));
         film.getDirectors().addAll(findDirectorsByFilmId(film.getId()));
