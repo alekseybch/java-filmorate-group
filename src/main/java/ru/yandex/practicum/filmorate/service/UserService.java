@@ -46,7 +46,7 @@ public class UserService {
     }
 
     public List<Feed> getUserFeed(Integer userId) {
-        log.info("Новостная лента пользователя: {} {}", users.getUser(userId).getName(),users.getUserFeed(userId));
+        log.info("Новостная лента пользователя: {} {}", users.getUser(userId).getName(), users.getUserFeed(userId));
         return users.getUserFeed(userId);
     }
 
