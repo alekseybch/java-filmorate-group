@@ -30,4 +30,5 @@ public interface FilmStorage {
     List<Film> getFilmByDirector(String query);
 
     List<Film> getFilmByTitle(String query);
+    List<Film> getLikedFilms();
 }
