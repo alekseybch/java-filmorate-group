@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -64,4 +65,10 @@ public class UserController {
     public void deleteUser(@PathVariable("id") Integer userId) {
         userService.delete(userId);
     }
+
+    @GetMapping("{id}/feed")
+        public List<Feed> getUserFeed(@PathVariable("id") Integer userId){
+            return userService.getUserFeed(userId);
+        }
+
 }

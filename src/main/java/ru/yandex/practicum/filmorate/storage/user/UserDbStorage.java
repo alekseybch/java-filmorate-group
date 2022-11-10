@@ -10,10 +10,17 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Date;
 import java.util.List;
 
 @Repository("UserDbStorage")
@@ -65,6 +72,12 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
+    public List<Feed> getUserFeed(Integer userId) {
+        String sqlQuery = "SELECT * FROM feed WHERE user_id = ?";
+        return jdbcTemplate.query(sqlQuery, this::makeFeed, userId);
+    }
+
+    @Override
     public void addFriend(Integer userId, Integer friendId) throws ResponseStatusException {
         if (!dbContainsUser(userId)) {
             String message = "Ошибка добавления в друзья!" +
@@ -78,6 +91,7 @@ public class UserDbStorage implements UserStorage {
         }
         String sqlQuery = "INSERT INTO friend_request (sender_id, addressee_id) VALUES (?, ?)";
         try {
+            addToFeedAddFriend(userId, friendId);
             jdbcTemplate.update(sqlQuery, userId, friendId);
         } catch (DuplicateKeyException e) {
             String message = "Ошибка запроса добавления в друзья." +
@@ -103,10 +117,25 @@ public class UserDbStorage implements UserStorage {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
         String sqlQuery = "DELETE FROM friend_request WHERE sender_id = ? AND addressee_id = ?";
+        addToFeedDeleteFriend(userId, friendId);
         if (jdbcTemplate.update(sqlQuery, userId, friendId) == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "Лайка от пользователя с id=" + userId + " у фильма с id=" + friendId + " нет");
         }
+    }
+
+    private void addToFeedDeleteFriend(Integer userId, Integer friendId) {
+        String sql = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp) " +
+                "VALUES (?, 'FRIEND', 'REMOVE', ?, ?)";
+        Date date = new Date();
+        jdbcTemplate.update(sql, userId, friendId, date.getTime());
+    }
+
+    private void addToFeedAddFriend(Integer userId, Integer friendId) {
+        String sql = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp)" +
+                " VALUES (?, 'FRIEND', 'ADD', ?, ?)";
+        Date date = new Date();
+        jdbcTemplate.update(sql, userId, friendId, date.getTime());
     }
 
     @Override
@@ -178,6 +207,17 @@ public class UserDbStorage implements UserStorage {
                 .login(resultSet.getString("login"))
                 .name(resultSet.getString("name"))
                 .birthday(resultSet.getDate("birthday").toLocalDate())
+                .build();
+    }
+
+    private Feed makeFeed(ResultSet rs, int rowNum) throws SQLException {
+        return Feed.builder()
+                .userId(rs.getInt("user_id"))
+                .eventType(rs.getString("event_type"))
+                .operation(rs.getString("operation"))
+                .eventId(rs.getInt("event_id"))
+                .entityId(rs.getInt("entity_id"))
+                .timestamp(rs.getLong("time_stamp"))
                 .build();
     }
 

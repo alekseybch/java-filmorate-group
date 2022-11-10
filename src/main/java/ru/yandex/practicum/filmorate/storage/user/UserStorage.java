@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.List;
@@ -10,6 +11,8 @@ public interface UserStorage {
     void delete(Integer userId);
 
     void update(User user);
+
+    List<Feed> getUserFeed(Integer userId);
 
     List<User> getUsersList();
 

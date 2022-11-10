@@ -13,12 +13,16 @@ import ru.yandex.practicum.filmorate.model.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Repository("FilmDbStorage")
 @Slf4j
-public class FilmDbStorage implements FilmStorage{
+public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
+
+     private final Date date = new Date();
 
     @Autowired
     public FilmDbStorage(JdbcTemplate jdbcTemplate) {
@@ -58,7 +62,7 @@ public class FilmDbStorage implements FilmStorage{
     }
 
     @Override
-    public Film update (Film film) {
+    public Film update(Film film) {
         String sqlQuery = "UPDATE film " +
                 "SET name = ?, description = ?, release_date = ?, duration = ?, mpa = ? WHERE film_id = ?";
         if (jdbcTemplate.update(sqlQuery, film.getName(), film.getDescription(), film.getReleaseDate()
@@ -101,7 +105,7 @@ public class FilmDbStorage implements FilmStorage{
         return jdbcTemplate.query(sqlQuery, this::makeFilm);
     }
 
-    public List<Film> getCommonFilms(Integer userId,Integer friendId){
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
         if (!dbContainsUser(userId)) {
             String message = "Ошибка запроса списка общих фильмов!" +
                     " Невозможно получить список фильмов несуществующего пользователя с id=" + userId;
@@ -122,7 +126,7 @@ public class FilmDbStorage implements FilmStorage{
                 "WHERE lu.person_id = ? AND lf.person_id = ?) " +
                 "GROUP BY f.film_id " +
                 "ORDER BY COUNT(l.person_id) DESC";
-        return jdbcTemplate.query(sqlQuery, this::makeFilm,userId,friendId);
+        return jdbcTemplate.query(sqlQuery, this::makeFilm, userId, friendId);
     }
 
     public List<Film> getTopFilms(Integer count, Integer genreId, Integer year) {
@@ -207,7 +211,7 @@ public class FilmDbStorage implements FilmStorage{
     }
 
     @Override
-    public void addLike(Integer userId, Integer filmId) throws  ResponseStatusException {
+    public void addLike(Integer userId, Integer filmId) throws ResponseStatusException {
         if (!dbContainsUser(userId)) {
             String message = "Ошибка запроса добавления лайка фильму." +
                     " Невозможно поставить лайк от пользователя с id= " + userId + " которого не существует.";
@@ -220,8 +224,9 @@ public class FilmDbStorage implements FilmStorage{
         }
         String sqlQuery = "INSERT INTO likes (person_id, film_id) VALUES (?, ?)";
         try {
+            addToFeedAddLike(userId, filmId);
             jdbcTemplate.update(sqlQuery, userId, filmId);
-        } catch (DuplicateKeyException e ) {
+        } catch (DuplicateKeyException e) {
             String message = "Ошибка запроса добавления лайка фильму." +
                     " Попытка полькователем поставить лайк дважды одному фильму.";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
@@ -241,10 +246,23 @@ public class FilmDbStorage implements FilmStorage{
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
         String sqlQuery = "DELETE FROM likes where person_id = ? AND film_id = ?";
+        addToFeedDeleteLike(userId, filmId);
         if (jdbcTemplate.update(sqlQuery, userId, filmId) == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "Лайка от пользователя с id=" + userId + " у фильма с id=" + filmId + " нет");
         }
+    }
+
+    private void addToFeedDeleteLike(Integer userId, Integer filmId) {
+        String sql = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp)" +
+                " VALUES (?, 'LIKE', 'REMOVE', ?, ?)";
+        jdbcTemplate.update(sql, userId, filmId, date.getTime());
+    }
+
+    private void addToFeedAddLike(Integer userId, Integer filmId) {
+        String sql = "INSERT INTO feed (user_id, event_type, operation,entity_id,time_stamp)" +
+                " VALUES (?, 'LIKE', 'ADD', ?, ?)";
+        jdbcTemplate.update(sql, userId, filmId, date.getTime());
     }
 
     private Film makeFilm(ResultSet resultSet, int rowSum) throws SQLException {
