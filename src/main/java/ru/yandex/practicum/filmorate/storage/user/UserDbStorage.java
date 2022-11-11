@@ -11,11 +11,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.time.*;
+import java.util.List;
 
 @Repository("UserDbStorage")
 @Slf4j
@@ -62,6 +65,12 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
+    public List<Feed> getUserFeed(Integer userId) {
+        String sqlQuery = "SELECT * FROM feed WHERE person_id = ?";
+        return jdbcTemplate.query(sqlQuery, this::makeFeed, userId);
+    }
+
+    @Override
     public void addFriend(Integer userId, Integer friendId) throws ResponseStatusException {
         if (!dbContainsUser(userId)) {
             String message = "Ошибка добавления в друзья!" +
@@ -76,6 +85,7 @@ public class UserDbStorage implements UserStorage {
         String sqlQuery = "INSERT INTO friend_request (sender_id, addressee_id) VALUES (?, ?)";
         try {
             jdbcTemplate.update(sqlQuery, userId, friendId);
+            addToFeedAddFriend(userId, friendId);
         } catch (DuplicateKeyException e) {
             String message = "Ошибка запроса добавления в друзья." +
                     " Невозможно добавить в друзья пользователя который уже в друзьях";
@@ -102,8 +112,9 @@ public class UserDbStorage implements UserStorage {
         String sqlQuery = "DELETE FROM friend_request WHERE sender_id = ? AND addressee_id = ?";
         if (jdbcTemplate.update(sqlQuery, userId, friendId) == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Лайка от пользователя с id=" + userId + " у фильма с id=" + friendId + " нет");
+                    "У пользователя с id=" + userId + " друга с id=" + friendId + " нет");
         }
+        addToFeedDeleteFriend(userId, friendId);
     }
 
     @Override
@@ -178,6 +189,17 @@ public class UserDbStorage implements UserStorage {
                 .build();
     }
 
+    private Feed makeFeed(ResultSet rs, int rowNum) throws SQLException {
+        return Feed.builder()
+                .userId(rs.getInt("person_id"))
+                .eventType(rs.getString("event_type"))
+                .operation(rs.getString("operation"))
+                .eventId(rs.getInt("event_id"))
+                .entityId(rs.getInt("entity_id"))
+                .timestamp(rs.getTimestamp("time_stamp"))
+                .build();
+    }
+
     private boolean dbContainsUser(User user) {
         String sqlQuery = "SELECT * FROM person WHERE email = ? AND login = ? AND name = ? AND birthday = ?";
         try {
@@ -198,5 +220,17 @@ public class UserDbStorage implements UserStorage {
         } catch (EmptyResultDataAccessException e) {
             return false;
         }
+    }
+
+    private void addToFeedDeleteFriend(Integer userId, Integer friendId) {
+        String sql = "INSERT INTO feed (person_id, event_type, operation, entity_id, time_stamp) " +
+                "VALUES (?, 'FRIEND', 'REMOVE', ?, ?)";
+        jdbcTemplate.update(sql, userId, friendId, Date.from(Instant.now()));
+    }
+
+    private void addToFeedAddFriend(Integer userId, Integer friendId) {
+        String sql = "INSERT INTO feed (person_id, event_type, operation, entity_id, time_stamp)" +
+                " VALUES (?, 'FRIEND', 'ADD', ?, ?)";
+        jdbcTemplate.update(sql, userId, friendId, Date.from(Instant.now()));
     }
 }

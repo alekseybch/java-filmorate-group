@@ -11,16 +11,16 @@ import ru.yandex.practicum.filmorate.model.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.time.Instant;
+import java.util.*;
 
 @Repository
 @RequiredArgsConstructor
-public class ReviewDbStorage implements ReviewStorage{
+public class ReviewDbStorage implements ReviewStorage {
 
     private final JdbcTemplate jdbcTemplate;
+
+    private final Date date = new Date();
 
     @Override
     public Review addReview(Review review) {
@@ -37,6 +37,7 @@ public class ReviewDbStorage implements ReviewStorage{
                 .usingGeneratedKeyColumns("review_id");
         int reviewId = simpleJdbcInsert.executeAndReturnKey(review.toMap()).intValue();
         review.setReviewId(reviewId);
+        addToFeedReviewCreate(review.getReviewId(), review.getUserId());
         return review;
     }
 
@@ -49,18 +50,22 @@ public class ReviewDbStorage implements ReviewStorage{
         }
         String sql = "UPDATE REVIEWS SET CONTENT = ?, IS_POSITIVE = ? WHERE REVIEW_ID = ?";
         jdbcTemplate.update(sql, review.getContent(), review.getIsPositive(), review.getReviewId());
-        return getReviewById(review.getReviewId());
+        review = getReviewById(review.getReviewId());
+        addToFeedReviewUpdate(review.getReviewId());
+        return review;
     }
 
     @Override
-        public void deleteReview(Integer reviewId) {
+    public void deleteReview(Integer reviewId) {
         if (!dbContainsReview(reviewId)) {
             String message = "Ошибка запроса удаления отзыва." +
                     " Невозможно удалить отзыв которого не существует.";
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
+        Integer userId = getReviewById(reviewId).getUserId();
         String sql = "DELETE FROM REVIEWS WHERE REVIEW_ID = ?";
         jdbcTemplate.update(sql, reviewId);
+        addToFeedReviewDelete(reviewId, userId);
     }
 
     @Override
@@ -203,5 +208,24 @@ public class ReviewDbStorage implements ReviewStorage{
                 .name(resultSet.getString("name"))
                 .birthday(resultSet.getDate("birthday").toLocalDate())
                 .build();
+    }
+
+    private void addToFeedReviewUpdate(Integer reviewId) {
+        String sqlQuery = "INSERT INTO feed (person_id, event_type, operation,entity_id,time_stamp) " +
+                "VALUES (?, 'REVIEW', 'UPDATE', ?,?)";
+        jdbcTemplate.update(sqlQuery, getReviewById(reviewId).getUserId(),
+                reviewId, Date.from(Instant.now()));
+    }
+
+    private void addToFeedReviewCreate(Integer reviewId, Integer userId) {
+        String sql = "INSERT INTO feed (person_id, event_type, operation,entity_id,time_stamp) " +
+                "VALUES (?, 'REVIEW', 'ADD', ?,?)";
+        jdbcTemplate.update(sql, userId, reviewId, Date.from(Instant.now()));
+    }
+
+    private void addToFeedReviewDelete(Integer reviewId, Integer userId) {
+        String sqlQuery = "INSERT INTO feed (person_id, event_type, operation,entity_id,time_stamp)" +
+                " VALUES (?, 'REVIEW', 'REMOVE', ?,?)";
+        jdbcTemplate.update(sqlQuery, userId, reviewId, Date.from(Instant.now()));
     }
 }

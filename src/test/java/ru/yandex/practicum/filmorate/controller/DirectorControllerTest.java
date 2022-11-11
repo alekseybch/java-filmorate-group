@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -31,6 +32,7 @@ public class DirectorControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     public void addAndGetDirector() throws Exception {
         //given
         Director director1 = Director.builder().name("name")
@@ -59,6 +61,7 @@ public class DirectorControllerTest {
     }
 
     @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     public void addDuplicateDirector() throws Exception {
         //given
         Director director1 = Director.builder().id(1).name("name")
@@ -101,6 +104,7 @@ public class DirectorControllerTest {
     }
 
     @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     public void addAndUpdateDirector() throws Exception {
         //given
         Director director1 = Director.builder().id(1).name("name")
@@ -140,6 +144,7 @@ public class DirectorControllerTest {
     }
 
     @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     public void updateUnknownDirector() throws Exception {
         //given
         Director director1 = Director.builder().id(1).name("name")
@@ -161,6 +166,7 @@ public class DirectorControllerTest {
     }
 
     @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     public void updateIncorrectName() throws Exception {
         //given
         Director director1 = Director.builder().id(1).name("name")
@@ -184,6 +190,7 @@ public class DirectorControllerTest {
     }
 
     @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     public void addAndDeleteDirector() throws Exception {
         //given
         Director director1 = Director.builder().id(1).name("name")
