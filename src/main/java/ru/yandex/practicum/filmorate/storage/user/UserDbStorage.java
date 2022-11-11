@@ -208,7 +208,7 @@ public class UserDbStorage implements UserStorage {
                 .operation(rs.getString("operation"))
                 .eventId(rs.getInt("event_id"))
                 .entityId(rs.getInt("entity_id"))
-                .timestamp(rs.getDate("time_stamp"))
+                .timestamp(rs.getTimestamp("time_stamp"))
                 .build();
     }
 

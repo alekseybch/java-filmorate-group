@@ -227,8 +227,8 @@ public class FilmDbStorage implements FilmStorage {
         }
         String sqlQuery = "INSERT INTO likes (person_id, film_id) VALUES (?, ?)";
         try {
-            addToFeedAddLike(userId, filmId);
             jdbcTemplate.update(sqlQuery, userId, filmId);
+            addToFeedAddLike(userId, filmId);
         } catch (DuplicateKeyException e) {
             String message = "Ошибка запроса добавления лайка фильму." +
                     " Попытка полькователем поставить лайк дважды одному фильму.";
@@ -249,11 +249,11 @@ public class FilmDbStorage implements FilmStorage {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
         String sqlQuery = "DELETE FROM likes where person_id = ? AND film_id = ?";
-        addToFeedDeleteLike(userId, filmId);
         if (jdbcTemplate.update(sqlQuery, userId, filmId) == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "Лайка от пользователя с id=" + userId + " у фильма с id=" + filmId + " нет");
         }
+        addToFeedDeleteLike(userId, filmId);
     }
 
     @Override

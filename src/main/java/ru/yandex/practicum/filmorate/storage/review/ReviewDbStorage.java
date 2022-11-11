@@ -50,9 +50,9 @@ public class ReviewDbStorage implements ReviewStorage {
         }
         String sql = "UPDATE REVIEWS SET CONTENT = ?, IS_POSITIVE = ? WHERE REVIEW_ID = ?";
         jdbcTemplate.update(sql, review.getContent(), review.getIsPositive(), review.getReviewId());
-        Review review1 = getReviewById(review.getReviewId());
-        addToFeedReviewUpdate(review1.getReviewId());
-        return getReviewById(review.getReviewId());
+        review = getReviewById(review.getReviewId());
+        addToFeedReviewUpdate(review.getReviewId());
+        return review;
     }
 
     private void addToFeedReviewUpdate(Integer reviewId) {
