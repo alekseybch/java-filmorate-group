@@ -55,26 +55,6 @@ public class ReviewDbStorage implements ReviewStorage {
         return review;
     }
 
-    private void addToFeedReviewUpdate(Integer reviewId) {
-        String sqlQuery = "INSERT INTO feed (person_id, event_type, operation,entity_id,time_stamp) " +
-                "VALUES (?, 'REVIEW', 'UPDATE', ?,?)";
-        jdbcTemplate.update(sqlQuery, getReviewById(reviewId).getUserId(),
-                reviewId, Date.from(Instant.now()));
-    }
-
-    private void addToFeedReviewCreate(Integer reviewId, Integer userId) {
-        String sql = "INSERT INTO feed (person_id, event_type, operation,entity_id,time_stamp) " +
-                "VALUES (?, 'REVIEW', 'ADD', ?,?)";
-        jdbcTemplate.update(sql, userId, reviewId, Date.from(Instant.now()));
-    }
-
-    private void addToFeedReviewDelete(Integer reviewId) {
-        String sqlQuery = "INSERT INTO feed (person_id, event_type, operation,entity_id,time_stamp)" +
-                " VALUES (?, 'REVIEW', 'REMOVE', ?,?)";
-        jdbcTemplate.update(sqlQuery, getReviewById(reviewId).getUserId(),
-                reviewId, Date.from(Instant.now()));
-    }
-
     @Override
     public void deleteReview(Integer reviewId) {
         if (!dbContainsReview(reviewId)) {
@@ -82,9 +62,10 @@ public class ReviewDbStorage implements ReviewStorage {
                     " Невозможно удалить отзыв которого не существует.";
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
-        addToFeedReviewDelete(reviewId);
+        Integer userId = getReviewById(reviewId).getUserId();
         String sql = "DELETE FROM REVIEWS WHERE REVIEW_ID = ?";
         jdbcTemplate.update(sql, reviewId);
+        addToFeedReviewDelete(reviewId, userId);
     }
 
     @Override
@@ -227,5 +208,24 @@ public class ReviewDbStorage implements ReviewStorage {
                 .name(resultSet.getString("name"))
                 .birthday(resultSet.getDate("birthday").toLocalDate())
                 .build();
+    }
+
+    private void addToFeedReviewUpdate(Integer reviewId) {
+        String sqlQuery = "INSERT INTO feed (person_id, event_type, operation,entity_id,time_stamp) " +
+                "VALUES (?, 'REVIEW', 'UPDATE', ?,?)";
+        jdbcTemplate.update(sqlQuery, getReviewById(reviewId).getUserId(),
+                reviewId, Date.from(Instant.now()));
+    }
+
+    private void addToFeedReviewCreate(Integer reviewId, Integer userId) {
+        String sql = "INSERT INTO feed (person_id, event_type, operation,entity_id,time_stamp) " +
+                "VALUES (?, 'REVIEW', 'ADD', ?,?)";
+        jdbcTemplate.update(sql, userId, reviewId, Date.from(Instant.now()));
+    }
+
+    private void addToFeedReviewDelete(Integer reviewId, Integer userId) {
+        String sqlQuery = "INSERT INTO feed (person_id, event_type, operation,entity_id,time_stamp)" +
+                " VALUES (?, 'REVIEW', 'REMOVE', ?,?)";
+        jdbcTemplate.update(sqlQuery, userId, reviewId, Date.from(Instant.now()));
     }
 }

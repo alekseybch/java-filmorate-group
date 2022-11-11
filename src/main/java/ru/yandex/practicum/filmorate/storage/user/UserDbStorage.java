@@ -117,18 +117,6 @@ public class UserDbStorage implements UserStorage {
         }
     }
 
-    private void addToFeedDeleteFriend(Integer userId, Integer friendId) {
-        String sql = "INSERT INTO feed (person_id, event_type, operation, entity_id, time_stamp) " +
-                "VALUES (?, 'FRIEND', 'REMOVE', ?, ?)";
-        jdbcTemplate.update(sql, userId, friendId, Date.from(Instant.now()));
-    }
-
-    private void addToFeedAddFriend(Integer userId, Integer friendId) {
-        String sql = "INSERT INTO feed (person_id, event_type, operation, entity_id, time_stamp)" +
-                " VALUES (?, 'FRIEND', 'ADD', ?, ?)";
-        jdbcTemplate.update(sql, userId, friendId, Date.from(Instant.now()));
-    }
-
     @Override
     public List<User> getCommonFriends(Integer userId, Integer friendId) throws ResponseStatusException {
         if (!dbContainsUser(userId)) {
@@ -232,5 +220,17 @@ public class UserDbStorage implements UserStorage {
         } catch (EmptyResultDataAccessException e) {
             return false;
         }
+    }
+
+    private void addToFeedDeleteFriend(Integer userId, Integer friendId) {
+        String sql = "INSERT INTO feed (person_id, event_type, operation, entity_id, time_stamp) " +
+                "VALUES (?, 'FRIEND', 'REMOVE', ?, ?)";
+        jdbcTemplate.update(sql, userId, friendId, Date.from(Instant.now()));
+    }
+
+    private void addToFeedAddFriend(Integer userId, Integer friendId) {
+        String sql = "INSERT INTO feed (person_id, event_type, operation, entity_id, time_stamp)" +
+                " VALUES (?, 'FRIEND', 'ADD', ?, ?)";
+        jdbcTemplate.update(sql, userId, friendId, Date.from(Instant.now()));
     }
 }
