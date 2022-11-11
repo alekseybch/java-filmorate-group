@@ -110,11 +110,11 @@ public class UserDbStorage implements UserStorage {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
         String sqlQuery = "DELETE FROM friend_request WHERE sender_id = ? AND addressee_id = ?";
-        addToFeedDeleteFriend(userId, friendId);
         if (jdbcTemplate.update(sqlQuery, userId, friendId) == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Лайка от пользователя с id=" + userId + " у фильма с id=" + friendId + " нет");
+                    "У пользователя с id=" + userId + " друга с id=" + friendId + " нет");
         }
+        addToFeedDeleteFriend(userId, friendId);
     }
 
     @Override
